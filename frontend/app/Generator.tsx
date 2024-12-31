@@ -7,6 +7,7 @@ import tacos from "@/icons/taco.png"
 
 import Image from "next/image"
 import { useState } from "react"
+import DisplayRecipe from "./DisplayRecipe"
 
 const postRequest = async (url: string, body: any) => {
     const response = await fetch(url, {
@@ -60,14 +61,14 @@ export default function Generator() {
     }
 
     return (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-2 w-full">
             <div>
               {recipes.length > 0 ? (
-                <div className="flex flex-col gap-4 w-full">
+                <div className="flex flex-col gap-2 w-full">
                   <textarea placeholder="What changes would you like to make?" onChange={(e) => setUpdateRecipeMessage(e.target.value)} className="w-full p-2 rounded-md" />
                   <button onClick={() => updateRecipe(recipes[0], updateRecipeMessage)} className="w-full bg-blue-500 text-white p-2 rounded-md">Update</button>
                 </div>
-              ) : <div className="grid grid-cols-4 gap-4 mb-8">
+              ) : <div className="grid grid-cols-4 gap-2 mb-8">
                 {recipeTypes.map((recipeType) => (
                   <div className="col-span-1" key={recipeType.name}>
                     <button
@@ -83,9 +84,7 @@ export default function Generator() {
             </div>
             {loadingMessage && <p>{loadingMessage}</p>}
             {recipes.map((recipe, index) => (
-                <div className="whitespace-pre-wrap" key={index}>
-                    {recipe}
-                </div>
+              <DisplayRecipe recipe={recipe} key={index} />
             ))}
         </div>
     );
