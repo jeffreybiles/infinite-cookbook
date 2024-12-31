@@ -7,24 +7,19 @@ const openai = new OpenAI({
 
 export async function POST(request: Request) {
   try {
-    const { recipe } = await request.json();
+    const { recipeRequest, preferences } = await request.json();
 
-    const completion = await openai.chat.completions.create({
+    const recipeCompletion = await openai.chat.completions.create({
       messages: [
-        {
-          role: "system",
-          content: "You are a helpful chef who provides recipes."
-        },
-        {
-          role: "user",
-          content: `Generate a recipe for ${recipe}. Include ingredients and steps.`
-        }
+        { role: "user", content: `Generate a recipe for ${recipeRequest}. Include ingredients and steps.` }
       ],
       model: "gpt-4o",
     });
 
+    const recipe = recipeCompletion.choices[0].message.content;
+
     return NextResponse.json({
-      recipe: completion.choices[0].message.content
+      recipe: recipe
     });
 
   } catch (error) {
