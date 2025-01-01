@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from groq import Groq
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
@@ -37,12 +36,13 @@ openai_client = OpenAI(
 groq_client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
-def completion(prompt: str, model: str = "llama-3.3-70b-specdec"):
+def completion(prompt: str, model: str = "llama-3.3-70b-specdec", json: bool = False):
     return groq_client.chat.completions.create(
         messages=[
             {"role": "user", "content": prompt}
         ],
-        model=model
+        model=model,
+        response_format={"type": "json_object"} if json else None
     )
 
 @app.post("/generate")
@@ -105,6 +105,14 @@ async def get_recipe(recipe_id: str):
     parent = await fetch_recipe(recipe.parent_id) if recipe.parent_id else None # type: ignore
     children = await fetch_children(int(recipe_id))
     return {"recipe": recipe, "parent": parent, "children": children}
+
+@app.get("/recipe/{recipe_id}/suggestions")
+async def get_suggestions(recipe_id: str):
+    recipe = await fetch_recipe(int(recipe_id))
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    suggestions = completion(f"Return a json array of 4 possible changes or improvements, in the format {{suggestions: [{{change: string, explanation: string}}]}}, where change is just 2-3 words, to the following recipe: {recipe.content}", json=True)
+    return {"suggestions": suggestions.choices[0].message.content}
 
 @app.on_event("startup")
 async def startup():
