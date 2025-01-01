@@ -32,7 +32,7 @@ export default function Generator() {
     const generateRecipe = async (recipeName: string) => {
         try {
             setLoadingMessage('Generating recipe...');
-            const response = await postRequest('/api/generate', { recipeRequest: recipeName });
+            const response = await postRequest('http://localhost:8000/generate', { recipeRequest: recipeName });
 
             if (!response.ok) {
                 throw new Error('Failed to generate recipe');
