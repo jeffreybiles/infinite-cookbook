@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import uvicorn
 
-from db import fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe, update_recipe as update_recipe_in_db
+from db import fetch_children, fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe, update_recipe as update_recipe_in_db
 
 load_dotenv()
 
@@ -100,7 +100,9 @@ async def update_recipe(request: UpdateRequest):
 async def get_recipe(recipe_id: str):
     print(f"Fetching recipe with id: {recipe_id}")
     recipe = await fetch_recipe(int(recipe_id))
-    return {"recipe": recipe }
+    parent = await fetch_recipe(recipe.parent_id) if recipe.parent_id else None # type: ignore
+    children = await fetch_children(int(recipe_id))
+    return {"recipe": recipe, "parent": parent, "children": children}
 
 @app.on_event("startup")
 async def startup():

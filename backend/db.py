@@ -3,8 +3,6 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, select, update
 from datetime import datetime
 from typing import AsyncGenerator
-from pydantic import BaseModel
-import json
 
 # Database setup
 DATABASE_URL = "sqlite+aiosqlite:///./recipes.db"
@@ -56,6 +54,11 @@ async def fetch_recipe(recipe_id: int) -> Recipe | None:
     async with async_session_maker() as session:
         result = await session.execute(select(Recipe).where(Recipe.id == recipe_id))
         return result.scalar_one_or_none()
+
+async def fetch_children(recipe_id: int) -> list[Recipe]:
+    async with async_session_maker() as session:
+        result = await session.execute(select(Recipe).where(Recipe.parent_id == recipe_id))
+        return list(result.scalars().all())
 
 async def update_recipe(recipe: Recipe):
     async with async_session_maker() as session:
