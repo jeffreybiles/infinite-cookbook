@@ -3,6 +3,7 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, select
 from datetime import datetime
 from typing import AsyncGenerator
+from pydantic import BaseModel
 import json
 
 # Database setup
@@ -23,6 +24,15 @@ class Recipe(Base):
     parent_id = Column(Integer, ForeignKey("recipes.id"), nullable=True)
     is_latest = Column(Boolean, default=True)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "prompt": self.prompt,
+            "content": self.content,
+            "created_at": self.created_at.isoformat(),
+            "parent_id": self.parent_id,
+            "is_latest": self.is_latest
+        }
 
 async def init_db():
     async with engine.begin() as conn:
@@ -41,3 +51,8 @@ async def fetch_recipes() -> list[Recipe]:
     async with async_session_maker() as session:
         result = await session.execute(select(Recipe))
         return list(result.scalars().all())
+
+async def fetch_recipe(recipe_id: int) -> Recipe | None:
+    async with async_session_maker() as session:
+        result = await session.execute(select(Recipe).where(Recipe.id == recipe_id))
+        return result.scalar_one_or_none()

@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import uvicorn
 
-from db import fetch_recipes, init_db, add_to_db, Recipe
+from db import fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe
 
 load_dotenv()
 
@@ -80,6 +80,12 @@ async def update_recipe(request: UpdateRequest):
     except Exception as e:
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update recipe")
+
+@app.get("/recipes/{recipe_id}")
+async def get_recipe(recipe_id: str):
+    print(f"Fetching recipe with id: {recipe_id}")
+    recipe = await fetch_recipe(int(recipe_id))
+    return {"recipe": recipe }
 
 @app.on_event("startup")
 async def startup():

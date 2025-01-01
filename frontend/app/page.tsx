@@ -1,4 +1,5 @@
-import Generator from "./Generator";
+import Generator from "../components/Generator";
+import RecipeList from "../components/RecipeList";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold">Infinite Cookbook</h1>
         <p className="text-lg">The cookbook that learns what you love and never stops giving you new recipes</p>
         <Generator />
+        <RecipeList />
       </div>
     </div>
   );
