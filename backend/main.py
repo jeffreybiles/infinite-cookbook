@@ -52,7 +52,7 @@ async def generate_recipe(request: RecipeRequest):
         )
         await add_to_db(db_recipe)
 
-        return {"recipe": recipe_content}
+        return {"recipe": db_recipe}
 
     except Exception as e:
         print(f"Error: {str(e)}")
