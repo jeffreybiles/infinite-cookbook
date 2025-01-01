@@ -10,7 +10,8 @@ import { useState } from "react"
 import DisplayRecipe from "./DisplayRecipe"
 
 const postRequest = async (url: string, body: any) => {
-    const response = await fetch(url, {
+    const fullUrl = `http://localhost:8000/${url}`
+    const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -32,7 +33,7 @@ export default function Generator() {
     const generateRecipe = async (recipeName: string) => {
         try {
             setLoadingMessage('Generating recipe...');
-            const response = await postRequest('http://localhost:8000/generate', { recipeRequest: recipeName });
+            const response = await postRequest('generate', { recipeRequest: recipeName });
 
             if (!response.ok) {
                 throw new Error('Failed to generate recipe');
@@ -50,9 +51,10 @@ export default function Generator() {
     const updateRecipe = async (recipe: string, preferences: string) => {
         try {
             setLoadingMessage('Updating recipe with your preferences...');
-            const response = await postRequest('/api/update', { recipe: recipe, preferences: preferences });
+            const response = await postRequest('update', { recipe: recipe, preferences: preferences });
             const data = await response.json();
             setRecipes([ data.updatedRecipe, ...recipes]);
+            setUpdateRecipeMessage('');
         } catch (error) {
             console.error('Error:', error);
         } finally {
@@ -66,7 +68,7 @@ export default function Generator() {
               {recipes.length > 0 ? (
                 <div className="flex flex-col gap-2 w-full">
                   <textarea placeholder="What changes would you like to make?" onChange={(e) => setUpdateRecipeMessage(e.target.value)} className="w-full p-2 rounded-md" />
-                  <button onClick={() => updateRecipe(recipes[0], updateRecipeMessage)} className="w-full bg-blue-500 text-white p-2 rounded-md">Update</button>
+                  <button onClick={() => updateRecipe(recipes.filter(recipe => recipe)[0], updateRecipeMessage)} className="w-full bg-blue-500 text-white p-2 rounded-md">Update</button>
                 </div>
               ) : <div className="grid grid-cols-4 gap-2 mb-8">
                 {recipeTypes.map((recipeType) => (
