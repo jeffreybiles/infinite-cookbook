@@ -1,0 +1,11 @@
+* Access recipes via ID
+  * /recipe/:id route
+  * /recipe/:id page
+  * make 'update' path create new recipe, add parent_id to that recipe, and set is_latest=False to parent
+  * if parent_id, have link to previous recipe
+  * if is_latest=False, have link to next recipe (include in the /recipe/:id route)
+* Fluidity
+  * Switch to something faster for generating content (groq?)
+  * Streaming content for the recipes
+  * Animations for going between existing recipes
+  * Animations for when waiting + when selecting changes

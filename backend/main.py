@@ -1,10 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
 import uvicorn
+
+from db import fetch_recipes, init_db, add_to_db, Recipe
 
 load_dotenv()
 
@@ -40,13 +43,25 @@ async def generate_recipe(request: RecipeRequest):
             model="gpt-4"
         )
 
-        recipe = recipe_completion.choices[0].message.content
+        recipe_content = recipe_completion.choices[0].message.content
 
-        return {"recipe": recipe}
+        # Save to database
+        db_recipe = Recipe(
+            prompt=request.recipeRequest,
+            content=recipe_content,
+        )
+        await add_to_db(db_recipe)
+
+        return {"recipe": recipe_content}
 
     except Exception as e:
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to generate recipe")
+
+@app.get("/recipes")
+async def get_recipes():
+    recipes = await fetch_recipes()
+    return {"recipes": recipes}
 
 @app.post("/update")
 async def update_recipe(request: UpdateRequest):
@@ -65,6 +80,10 @@ async def update_recipe(request: UpdateRequest):
     except Exception as e:
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update recipe")
+
+@app.on_event("startup")
+async def startup():
+    await init_db()
 
 if __name__ == "__main__":
     print("Starting server")
