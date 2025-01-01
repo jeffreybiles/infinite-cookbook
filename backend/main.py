@@ -107,11 +107,18 @@ async def get_recipe(recipe_id: str):
     return {"recipe": recipe, "parent": parent, "children": children}
 
 @app.get("/recipe/{recipe_id}/suggestions")
-async def get_suggestions(recipe_id: str):
+async def get_suggestions(recipe_id: str, previous: str = ""):
+    previous_changes = previous.split(',')
     recipe = await fetch_recipe(int(recipe_id))
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
-    suggestions = completion(f"Return a json array of 4 possible changes or improvements, in the format {{suggestions: [{{change: string, explanation: string}}]}}, where change is just 2-3 words, to the following recipe: {recipe.content}", json=True)
+    suggestions = completion(f"""
+        Return a json array of 4 possible changes or improvements, in the format {{suggestions: [{{change: string, explanation: string}}]}}
+
+        The changes should be just 2-3 words, and the following are not repeated: {previous_changes}
+
+        Make the changes to the following recipe: {recipe.content}
+    """, json=True)
     return {"suggestions": suggestions.choices[0].message.content}
 
 @app.on_event("startup")

@@ -15,14 +15,15 @@ export default function Updater({ recipe_id }: { recipe_id: string }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const router = useRouter();
 
+  const loadSuggestions = async () => {
+    const response = await fetch(`http://localhost:8000/recipe/${recipe_id}/suggestions?previous=${suggestions.map(s => s.change).join(',')}`);
+    const data = await response.json();
+    const sgg = JSON.parse(data.suggestions);
+    setSuggestions([...suggestions, ...sgg.suggestions]);
+  }
+
 useEffect(() => {
-    fetch(`http://localhost:8000/recipe/${recipe_id}/suggestions`)
-      .then(response => response.json())
-      .then(data => {
-        const sgg = JSON.parse(data.suggestions);
-        console.log(sgg);
-        setSuggestions(sgg.suggestions);
-      });
+    loadSuggestions();
   }, [recipe_id]);
 
   const updateRecipe = async (change?: string) => {
@@ -60,6 +61,7 @@ useEffect(() => {
           <p className="text-sm mb-0">{suggestion.explanation}</p>
         </button>
       })}
+      <button onClick={() => loadSuggestions()} className="bg-blue-500 text-white p-2 rounded-md">More suggestions</button>
     </div>}
   </div>
 }
