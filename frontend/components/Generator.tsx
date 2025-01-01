@@ -8,18 +8,7 @@ import tacos from "@/icons/taco.png"
 import Image from "next/image"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-
-const postRequest = async (url: string, body: any) => {
-    const fullUrl = `http://localhost:8000/${url}`
-    const response = await fetch(fullUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-    });
-    return response;
-}
+import { postRequest } from "@/utils/post-request"
 
 export default function Generator() {
     const recipeTypes = [{name: "Pizza", icon: pizza}, {name: "Steak", icon: steak}, {name: "Salad", icon: salad}, {name: "Tacos", icon: tacos}]
@@ -41,19 +30,6 @@ export default function Generator() {
                 router.push(`/recipe/${data.recipe.id}`);
                 return;
             }
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            setLoadingMessage('');
-        }
-    }
-
-    const updateRecipe = async (recipe: string, preferences: string) => {
-        try {
-            setLoadingMessage('Updating recipe with your preferences...');
-            const response = await postRequest('update', { recipe: recipe, preferences: preferences });
-            const data = await response.json();
-            // setRecipe(data.updatedRecipe);
         } catch (error) {
             console.error('Error:', error);
         } finally {

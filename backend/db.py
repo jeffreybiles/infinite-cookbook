@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, select
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, select, update
 from datetime import datetime
 from typing import AsyncGenerator
 from pydantic import BaseModel
@@ -56,3 +56,8 @@ async def fetch_recipe(recipe_id: int) -> Recipe | None:
     async with async_session_maker() as session:
         result = await session.execute(select(Recipe).where(Recipe.id == recipe_id))
         return result.scalar_one_or_none()
+
+async def update_recipe(recipe: Recipe):
+    async with async_session_maker() as session:
+        await session.merge(recipe)
+        await session.commit()

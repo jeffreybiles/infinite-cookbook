@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import uvicorn
 
-from db import fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe
+from db import fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe, update_recipe as update_recipe_in_db
 
 load_dotenv()
 
@@ -26,7 +26,7 @@ class RecipeRequest(BaseModel):
     recipeRequest: str
 
 class UpdateRequest(BaseModel):
-    recipe: str
+    recipe_id: int
     preferences: str
 
 openai_client = OpenAI(
@@ -66,16 +66,31 @@ async def get_recipes():
 @app.post("/update")
 async def update_recipe(request: UpdateRequest):
     try:
+        old_recipe = await fetch_recipe(request.recipe_id)
+        if not old_recipe:
+            raise HTTPException(status_code=404, detail="Recipe not found")
+
         updated_recipe_completion = openai_client.chat.completions.create(
             messages=[
-                {"role": "user", "content": f"Update the recipe for {request.recipe} to include the following preferences: {request.preferences}"}
+                {"role": "user", "content": f"Update the recipe for {old_recipe.content} to include the following preferences: {request.preferences}"}
             ],
             model="gpt-4"
         )
 
         updated_recipe = updated_recipe_completion.choices[0].message.content
+        if not updated_recipe:
+            raise HTTPException(status_code=400, detail="Failed to update recipe")
 
-        return {"updatedRecipe": updated_recipe}
+        db_recipe = Recipe(
+            parent_id=request.recipe_id,
+            content=updated_recipe,
+            prompt=request.preferences,
+        )
+        await add_to_db(db_recipe)
+        old_recipe.is_latest = False # type: ignore
+        await update_recipe_in_db(old_recipe)
+
+        return {"recipe": db_recipe}
 
     except Exception as e:
         print(f"Error: {str(e)}")
