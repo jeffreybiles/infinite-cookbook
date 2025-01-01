@@ -1,5 +1,5 @@
+* Parse webpage for initial recipe (which tooling should I use?)
 * Fluidity
-  * Switch to something faster for generating content (groq?)
   * Streaming content for the recipes
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes
@@ -8,5 +8,7 @@
   * Prompt for updating should act as if it's generating for the first time
   * Generate suggested modifications (try using LLM for it), add buttons for those
   * Make it refuse non-recipe requests (add smaller LLM to check whether the responses are a recipe, fail them if not)
+  * Try JSON Mode, getting array of ingredients/amounts + directions
 * Start storing preferences based on the modifications
+* Script to generate 20 more categories of food + icons and download the images
 * Bonus: make a 'chain' that's visible all at once.  And I guess branching?  This could be challenging on the database as currently constructed

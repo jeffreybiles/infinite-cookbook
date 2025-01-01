@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from groq import Groq
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI
@@ -33,15 +34,21 @@ openai_client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
+groq_client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
+def completion(prompt: str, model: str = "llama-3.3-70b-specdec"):
+    return groq_client.chat.completions.create(
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        model=model
+    )
+
 @app.post("/generate")
 async def generate_recipe(request: RecipeRequest):
     try:
-        recipe_completion = openai_client.chat.completions.create(
-            messages=[
-                {"role": "user", "content": f"Generate a recipe for {request.recipeRequest}. Include ingredients and steps."}
-            ],
-            model="gpt-4"
-        )
+        recipe_completion = completion(f"Generate a recipe for {request.recipeRequest}. Include ingredients and steps.")
 
         recipe_content = recipe_completion.choices[0].message.content
 
@@ -70,12 +77,7 @@ async def update_recipe(request: UpdateRequest):
         if not old_recipe:
             raise HTTPException(status_code=404, detail="Recipe not found")
 
-        updated_recipe_completion = openai_client.chat.completions.create(
-            messages=[
-                {"role": "user", "content": f"Update the recipe for {old_recipe.content} to include the following preferences: {request.preferences}"}
-            ],
-            model="gpt-4"
-        )
+        updated_recipe_completion = completion(f"Update the recipe for {old_recipe.content} to include the following preferences: {request.preferences}")
 
         updated_recipe = updated_recipe_completion.choices[0].message.content
         if not updated_recipe:
