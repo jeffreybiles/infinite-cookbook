@@ -1,17 +1,114 @@
 "use client"
 
-import pizza from "@/icons/pizza.png"
-import steak from "@/icons/steak.png"
-import salad from "@/icons/salad.png"
-import tacos from "@/icons/taco.png"
-
-import Image from "next/image"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { postRequest } from "@/utils/post-request"
 
+const recipeTypes = [
+    "Pad Thai",
+    "Fish and Chips",
+    "Chicken Fettuccine",
+    "Beef Tacos",
+    "Vegetable Curry",
+    "Sushi Rolls",
+    "Chicken Tikka Masala",
+    "Meatball Subs",
+    "Grilled Steak",
+    "Lobster Bisque",
+    "Quesadillas",
+    "Chicken Souvlaki",
+    "Shrimp Scampi",
+    "Eggplant Parmesan",
+    "Jambalaya",
+    "Falafel Wrap",
+    "Chicken Parmesan",
+    "Banana Pancakes",
+    "Breakfast Burrito",
+    "Lasagna",
+    "Chicken Quesadilla",
+    "Beef and Broccoli",
+    "Pho",
+    "Chicken Tenders",
+    "Meatloaf",
+    "Mashed Potatoes",
+    "Ramen",
+    "Grilled Cheese",
+    "Chicken Caesar",
+    "Turkey Club",
+    "Veggie Burger",
+    "Chili Con Carne",
+    "Baked Salmon",
+    "Chicken Fajitas",
+    "Onion Rings",
+    " Crab Cakes",
+    "Beef Stroganoff",
+    "Chicken Pot Pie",
+    "Fish Tacos",
+    "Steak Sandwich",
+    "Lentil Soup",
+    "Roast Chicken",
+    "Beef Jerky",
+    "Pork Chops",
+    "Breakfast Tacos",
+    "Chicken Tikka",
+    "Shrimp Cocktail",
+    "Eggs Benedict",
+    "Chicken Cordon Bleu",
+    "Beef Burgers",
+    "Tuna Salad",
+    "Chicken Tacos",
+    "Falafel",
+    "Grilled Panini",
+    "Chicken Satay",
+    "Beef and Mushroom",
+    "Veggie Skewers",
+    "Chicken and Waffles",
+    "Crab Rangoon",
+    "Chicken Empanadas",
+    "Beef and Onion",
+    "Shrimp and Pasta",
+    "Chicken Quesadilla Casserole",
+    "Turkey Meatballs",
+    "Chicken Tzatziki",
+    "Chicken Fricassee",
+    "Beef and Guinness",
+    "Chicken Cacciatore",
+    "Shrimp and Grits",
+    "Chicken and Dumplings",
+    "Beef and Broccoli Stir Fry",
+    "Chicken Shawarma",
+    "Chicken and Rice Bowl",
+    "Turkey and Avocado Wrap",
+    "Chicken Tandoori",
+    "Beef and Mushroom Gravy",
+    "Chicken and Spinach Calzone",
+    "Shrimp and Vegetable Stir Fry",
+    "Chicken and Sausage Jambalaya",
+    "Beef and Cheese Frittata",
+    "Chicken and Bacon Wrap",
+    "Turkey and Mashed Potato Shepherd's Pie",
+    "Chicken and Mushroom Crepes",
+    "Beef and Vegetable Kabobs",
+    "Chicken and Broccoli Pasta Bake",
+    "Shrimp and Lemon Spaghetti",
+    "Chicken and Asparagus Risotto",
+    "Beef and Guinness Stew",
+    "Chicken and Mushroom Meatball Subs",
+    "Turkey and Cranberry Sandwich",
+    "Chicken and Vegetable Spring Rolls",
+    "Beef and Onion Meatloaf",
+    "Chicken and Shrimp Paella",
+    "Chicken and Mushroom Quesadillas"
+]
+
 export default function Generator() {
-    const recipeTypes = [{name: "Pizza", icon: pizza}, {name: "Steak", icon: steak}, {name: "Salad", icon: salad}, {name: "Tacos", icon: tacos}]
+    const [chosenRecipeTypes, setChosenRecipeTypes] = useState<string[]>([]);
+
+    useEffect(() => {
+        const randomRecipeTypes = recipeTypes.sort(() => Math.random() - 0.5).slice(0, 12);
+        setChosenRecipeTypes(randomRecipeTypes);
+    }, []);
+
     const [loadingMessage, setLoadingMessage] = useState<string>("");
     const router = useRouter();
 
@@ -38,21 +135,21 @@ export default function Generator() {
     }
 
     return (
-        <div className="flex flex-col gap-2 w-full">
-            <div className="grid grid-cols-4 gap-2 mb-8">
-                {recipeTypes.map((recipeType) => (
-                  <div className="col-span-1" key={recipeType.name}>
-                    <button
-                      className="flex items-center justify-center"
-                      onClick={() => generateRecipe(recipeType.name)}
-                      disabled={loadingMessage !== ''}
-                    >
-                      <Image src={recipeType.icon} alt={recipeType.name} width={100} height={100} />
-                    </button>
-                  </div>
-                ))}
-            </div>
-            {loadingMessage && <p>{loadingMessage}</p>}
+      <div className="flex flex-col gap-2 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-8">
+        {chosenRecipeTypes.map((recipeType) => (
+          <div className="col-span-1" key={recipeType}>
+          <button
+              className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full hover:bg-gray-100 transition-colors duration-300"
+              onClick={() => generateRecipe(recipeType)}
+              disabled={loadingMessage !== ''}
+          >
+            {recipeType}
+          </button>
+          </div>
+        ))}
         </div>
+        {loadingMessage && <p>{loadingMessage}</p>}
+      </div>
     );
 }

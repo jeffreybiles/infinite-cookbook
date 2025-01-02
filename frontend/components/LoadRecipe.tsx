@@ -37,6 +37,6 @@ export default function LoadRecipe({ id }: { id: string }) {
         }}>{child.prompt} →</button>)}
       </div>
     </div>
-    {recipe ? <DisplayRecipe recipe={recipe.content} name={recipe.name} /> : <div></div>}
+    {recipe ? <DisplayRecipe recipe={recipe.content} name={recipe.name || recipe.prompt} /> : <div></div>}
   </div>
 }
