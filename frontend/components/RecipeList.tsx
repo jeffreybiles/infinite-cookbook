@@ -19,7 +19,7 @@ export default function RecipeList() {
 
   return <div>
     {recipes.map((recipe) => <div key={recipe.id}>
-      <Link href={`/recipe/${recipe.id}`}>{recipe.prompt}</Link>
+      <Link href={`/recipe/${recipe.id}`}>{recipe.name || recipe.prompt}</Link>
     </div>)}
   </div>
 }

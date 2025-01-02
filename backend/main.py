@@ -61,6 +61,16 @@ def check_validity(recipe: str):
     except:
         return False
 
+def generate_name(recipe: str):
+    response = completion(
+        f"""Return json with the format {{name: string}} with the name of the following recipe: {recipe}
+        Do not include the word "updated" in the name.
+        """,
+        model="llama-3.1-8b-instant",
+        json=True
+    )
+    return json.loads(response).get("name", "")
+
 @app.post("/generate")
 async def generate_recipe(request: RecipeRequest):
     try:
@@ -70,10 +80,13 @@ async def generate_recipe(request: RecipeRequest):
         if not check_validity(recipe_completion):
             raise HTTPException(status_code=400, detail="The response was not a recipe.  Try a different prompt.")
 
+        recipe_name = generate_name(recipe_completion)
+
         # Save to database
         db_recipe = Recipe(
             prompt=request.recipeRequest,
             content=recipe_completion,
+            name=recipe_name,
         )
         await add_to_db(db_recipe)
 
@@ -105,10 +118,13 @@ async def update_recipe(request: UpdateRequest):
         if not check_validity(updated_recipe_completion):
             raise HTTPException(status_code=400, detail="The response was not a recipe.  Try a different prompt.")
 
+        recipe_name = generate_name(updated_recipe_completion)
+
         db_recipe = Recipe(
             parent_id=request.recipe_id,
             content=updated_recipe_completion,
             prompt=request.preferences,
+            name=recipe_name,
         )
         await add_to_db(db_recipe)
         old_recipe.is_latest = False # type: ignore

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, select, update
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, select, update, text
 from datetime import datetime
 from typing import AsyncGenerator
 
@@ -18,6 +18,7 @@ class Recipe(Base):
     id = Column(Integer, primary_key=True, index=True)
     prompt = Column(String)
     content = Column(Text)
+    name = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     parent_id = Column(Integer, ForeignKey("recipes.id"), nullable=True)
     is_latest = Column(Boolean, default=True)
@@ -27,6 +28,7 @@ class Recipe(Base):
             "id": self.id,
             "prompt": self.prompt,
             "content": self.content,
+            "name": self.name,
             "created_at": self.created_at.isoformat(),
             "parent_id": self.parent_id,
             "is_latest": self.is_latest
@@ -64,3 +66,4 @@ async def update_recipe(recipe: Recipe):
     async with async_session_maker() as session:
         await session.merge(recipe)
         await session.commit()
+
