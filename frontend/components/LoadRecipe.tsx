@@ -23,7 +23,7 @@ export default function LoadRecipe({ id }: { id: string }) {
       setChildren(data.children)
       setParent(data.parent)
     })
-  }, [id])
+  }, [])
 
   return <div className="flex flex-col gap-4 pt-4">
     <div className="flex flex-row justify-between">
