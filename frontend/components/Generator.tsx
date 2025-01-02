@@ -105,33 +105,39 @@ export default function Generator() {
     const [chosenRecipeTypes, setChosenRecipeTypes] = useState<string[]>([]);
 
     useEffect(() => {
-        const randomRecipeTypes = recipeTypes.sort(() => Math.random() - 0.5).slice(0, 12);
-        setChosenRecipeTypes(randomRecipeTypes);
+      const randomRecipeTypes = recipeTypes.sort(() => Math.random() - 0.5).slice(0, 12);
+      setChosenRecipeTypes(randomRecipeTypes);
     }, []);
 
     const [loadingMessage, setLoadingMessage] = useState<string>("");
     const router = useRouter();
 
     const generateRecipe = async (recipeName: string) => {
-        try {
-            setLoadingMessage('Generating recipe...');
-            const response = await postRequest('generate', { recipeRequest: recipeName });
+      try {
+        setLoadingMessage('Generating recipe...');
+        const response = await postRequest('generate', { recipeRequest: recipeName });
 
-            if (!response.ok) {
-                throw new Error('Failed to generate recipe');
-            }
-            setLoadingMessage('Recipe generated!  Sending it to you...');
-
-            const data = await response.json();
-            if (data.recipe.id) {
-                router.push(`/recipe/${data.recipe.id}`);
-                return;
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            setLoadingMessage('');
+        if (!response.ok) {
+          throw new Error('Failed to generate recipe');
         }
+        setLoadingMessage('Recipe generated!  Sending it to you...');
+
+        const data = await response.json();
+        if (data.recipe.id) {
+          router.push(`/recipe/${data.recipe.id}`);
+          return;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoadingMessage('');
+      }
+    }
+
+    const generateMoreIdeas = async () => {
+      const response = await fetch('http://localhost:8000/dish-ideas?current=' + chosenRecipeTypes.join(','));
+      const data = await response.json();
+      setChosenRecipeTypes([...chosenRecipeTypes, ...data.dish_ideas]);
     }
 
     return (
@@ -140,16 +146,17 @@ export default function Generator() {
         {chosenRecipeTypes.map((recipeType) => (
           <div className="col-span-1" key={recipeType}>
           <button
-              className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full hover:bg-gray-100 transition-colors duration-300"
-              onClick={() => generateRecipe(recipeType)}
-              disabled={loadingMessage !== ''}
+            className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full h-full hover:bg-gray-100 transition-colors duration-300 disabled:opacity-50"
+            onClick={() => generateRecipe(recipeType)}
+            disabled={loadingMessage !== ''}
           >
             {recipeType}
           </button>
           </div>
         ))}
         </div>
-        {loadingMessage && <p>{loadingMessage}</p>}
+        <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateMoreIdeas()}>More ideas</button>
+        {loadingMessage && <p className="text-center">{loadingMessage}</p>}
       </div>
     );
 }

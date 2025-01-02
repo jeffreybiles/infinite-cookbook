@@ -161,6 +161,15 @@ async def get_suggestions(recipe_id: str, previous: str = ""):
     """, json=True)
     return {"suggestions": suggestions}
 
+@app.get("/dish-ideas")
+async def get_dish_ideas(current: str = ""):
+    dish_ideas = completion(f"Return a json array of 12 dish ideas, in the format {{dish_ideas: [string]}}.  The dish ideas should not contain the following: {current}", json=True)
+    print(f"Dish ideas: {dish_ideas}")
+    try:
+        return json.loads(dish_ideas)
+    except:
+        return {"dish_ideas": []}
+
 @app.on_event("startup")
 async def startup():
     await init_db()

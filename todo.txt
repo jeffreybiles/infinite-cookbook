@@ -1,6 +1,7 @@
 * Initial page
   * Allow custom dish requests
   * Generate 20 categories of food, allow generations of more
+* Allow retry when JSON doesn't generate correctly.  Example: (Error: Error code: 400 - {'error': {'message': "Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more details.", 'type': 'invalid_request_error', 'code': 'json_validate_failed', 'failed_generation': '{\n   "Vegetable Curry"\n}'}})
 * Preferences
   * Have preference options for allergens, spices, ingredients, etc.
   * Start storing preferences based on the modifications.  The allergens and spice level should be saved, as well as things they remove.  What about things they add?
