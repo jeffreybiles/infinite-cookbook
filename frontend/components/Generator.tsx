@@ -103,7 +103,8 @@ const recipeTypes = [
 
 export default function Generator() {
     const [chosenRecipeTypes, setChosenRecipeTypes] = useState<string[]>([]);
-
+    const [showCustomDishDescription, setShowCustomDishDescription] = useState<boolean>(false);
+    const [customDishDescription, setCustomDishDescription] = useState<string>("");
     useEffect(() => {
       const randomRecipeTypes = recipeTypes.sort(() => Math.random() - 0.5).slice(0, 12);
       setChosenRecipeTypes(randomRecipeTypes);
@@ -142,20 +143,28 @@ export default function Generator() {
 
     return (
       <div className="flex flex-col gap-2 w-full">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-2">
-        {chosenRecipeTypes.map((recipeType) => (
-          <div className="col-span-1" key={recipeType}>
-          <button
-            className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full h-full hover:bg-gray-100 transition-colors duration-300 disabled:opacity-50"
-            onClick={() => generateRecipe(recipeType)}
-            disabled={loadingMessage !== ''}
-          >
-            {recipeType}
-          </button>
+        {showCustomDishDescription ? <div className="flex flex-col gap-2 w-full">
+          <textarea className="border border-gray-300 p-2 rounded-md w-full" placeholder="Describe what you want to eat.  Feel free to go into detail or leave it vague." value={customDishDescription} onChange={(e) => setCustomDishDescription(e.target.value)} />
+          <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateRecipe(customDishDescription)}>Generate</button>
+        </div> : <>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-2">
+            {chosenRecipeTypes.map((recipeType) => (
+              <div className="col-span-1" key={recipeType}>
+              <button
+                className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full h-full hover:bg-gray-100 transition-colors duration-300 disabled:opacity-50"
+                onClick={() => generateRecipe(recipeType)}
+                disabled={loadingMessage !== ''}
+              >
+                {recipeType}
+              </button>
+              </div>
+            ))}
           </div>
-        ))}
-        </div>
-        <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateMoreIdeas()}>More ideas</button>
+          <div className="grid grid-cols-2 gap-2">
+            <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateMoreIdeas()}>More ideas</button>
+            <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => setShowCustomDishDescription(true)}>Describe what you want to eat</button>
+          </div>
+        </>}
         {loadingMessage && <p className="text-center">{loadingMessage}</p>}
       </div>
     );

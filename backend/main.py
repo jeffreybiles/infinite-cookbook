@@ -63,9 +63,14 @@ def check_validity(recipe: str):
 
 def generate_name(recipe: str):
     response = completion(
-        f"""Return json with the format {{name: string}} with the name of the following recipe: {recipe}
-        Do not include the word "updated" in the name.
-        """,
+        f"""You must return a valid JSON object with exactly this format: {{"name": "Recipe Name Here"}}
+
+        Generate a short, descriptive name for this recipe: {recipe}
+
+        Requirements:
+        - Do not include the word "updated"
+        - The response must be a valid JSON object
+        - The name should be concise (3-6 words)""",
         model="llama-3.1-8b-instant",
         json=True
     )

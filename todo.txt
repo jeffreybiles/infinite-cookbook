@@ -1,5 +1,3 @@
-* Initial page
-  * Allow custom dish requests
 * Allow retry when JSON doesn't generate correctly.  Example: (Error: Error code: 400 - {'error': {'message': "Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more details.", 'type': 'invalid_request_error', 'code': 'json_validate_failed', 'failed_generation': '{\n   "Vegetable Curry"\n}'}})
 * Preferences
   * Have preference options for allergens, spices, ingredients, etc.
@@ -11,5 +9,4 @@
   * Streaming content for the recipes
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes
-
 * Bonus: make a 'chain' that's visible all at once.  And I guess branching?  This could be challenging on the database as currently constructed
