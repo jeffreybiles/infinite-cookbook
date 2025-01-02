@@ -14,6 +14,7 @@ export default function Updater({ recipe_id }: { recipe_id: string }) {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [preferences, setPreferences] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showCustomSuggestion, setShowCustomSuggestion] = useState<boolean>(false);
   const router = useRouter();
 
   const loadSuggestions = async () => {
@@ -51,24 +52,34 @@ useEffect(() => {
   }
 
   return <div className="flex flex-col gap-2 w-full">
-    <input type="text" placeholder="What would you like to change?" onChange={(e) => setPreferences(e.target.value)} className="border border-gray-300 p-2 rounded-md" />
-    <button onClick={() => updateRecipe()} className="bg-blue-500 text-white p-2 rounded-md">Update</button>
     {loadingMessage && <p className="text-center">{loadingMessage}</p>}
     {errorMessage && <p className="text-center text-red-500">{errorMessage}</p>}
-    {suggestions && <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
-      {suggestions.map((suggestion: Suggestion) => {
-        return <button
-          key={suggestion.change}
-          className="flex flex-col p-3 border border-gray-300 rounded-md text-left hover:bg-gray-100 transition-colors duration-300"
-          onClick={() => {
-            updateRecipe(suggestion.change);
-          }}
-        >
-          <h4 className="text-lg font-bold mb-2 mt-0">{suggestion.change}</h4>
-          <p className="text-sm mb-0">{suggestion.explanation}</p>
-        </button>
-      })}
-      <button onClick={() => loadSuggestions()} className="bg-blue-500 text-white p-2 rounded-md">More suggestions</button>
-    </div>}
+    {showCustomSuggestion ?
+      <div className="flex flex-col gap-2 w-full">
+        <textarea placeholder="What would you like to change?  Type as much as you want." onChange={(e) => setPreferences(e.target.value)} className="border border-gray-300 p-2 rounded-md" />
+        <button onClick={() => updateRecipe()} className="bg-blue-500 text-white p-2 rounded-md">Update</button>
+      </div>
+      :
+      <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+          {suggestions && suggestions.map((suggestion: Suggestion) => {
+            return <button
+              key={suggestion.change}
+              className="flex flex-col p-3 border border-gray-300 rounded-md text-left hover:bg-gray-100 transition-colors duration-300"
+              onClick={() => {
+                updateRecipe(suggestion.change);
+              }}
+            >
+              <h4 className="text-lg font-bold mb-2 mt-0">{suggestion.change}</h4>
+              <p className="text-sm mb-0">{suggestion.explanation}</p>
+            </button>
+          })}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={() => loadSuggestions()} className="bg-blue-500 text-white p-2 rounded-md">More suggestions</button>
+          <button onClick={() => setShowCustomSuggestion(true)} className="bg-blue-500 text-white p-2 rounded-md">Custom suggestion</button>
+        </div>
+      </>
+    }
   </div>
 }
