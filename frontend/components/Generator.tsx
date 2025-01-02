@@ -142,7 +142,7 @@ export default function Generator() {
 
     return (
       <div className="flex flex-col gap-2 w-full">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-2">
         {chosenRecipeTypes.map((recipeType) => (
           <div className="col-span-1" key={recipeType}>
           <button
