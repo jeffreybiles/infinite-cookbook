@@ -1,7 +1,6 @@
 * Proompting
   * Separate call to get title for recipe (bonus: "make it unique from this list (parent chain)").  Save it.  Show it when displaying the recipe.
   * Prompt for updating should act as if it's generating for the first time
-  * Make it refuse non-recipe requests (add smaller LLM to check whether the responses are a recipe, fail them if not)
   * Try JSON Mode, getting array of ingredients/amounts + directions.  This can then be used for styling better than we could with markdown.
 * Preferences
   * Have preference options for allergens, spices, ingredients, etc.

@@ -17,6 +17,7 @@ We will use LLM generation for the following:
 * Generating the initial recipes
 * Generating/choosing the edit suggestions
 * Updating the recipes
+* Checking for validity
 
 There will also be light tool use:
 * Scraping to find recipes on a specific page given to it

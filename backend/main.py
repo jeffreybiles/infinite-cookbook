@@ -6,6 +6,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 import uvicorn
+import json
 
 from db import fetch_children, fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe, update_recipe as update_recipe_in_db
 
@@ -36,31 +37,50 @@ openai_client = OpenAI(
 groq_client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
-def completion(prompt: str, model: str = "llama-3.3-70b-specdec", json: bool = False):
-    return groq_client.chat.completions.create(
+def completion(prompt: str, model: str = "llama-3.3-70b-specdec", json: bool = False) -> str:
+    response = groq_client.chat.completions.create(
         messages=[
             {"role": "user", "content": prompt}
         ],
         model=model,
         response_format={"type": "json_object"} if json else None
     )
+    return response.choices[0].message.content or ''
+
+def check_validity(recipe: str):
+    response = completion(
+        f"Check if the following is a recipe that is used for cooking.  Return json {{is_recipe: boolean}}: {recipe}",
+        json=True,
+        model="llama-3.1-8b-instant"
+        # This model has higher per-minute token limits, and also doesn't count against the 6k/minute limit on 3.3-70b-specdec
+        # It doesn't need to be as advanced, it just needs to accurately check if it's a recipe
+    )
+    try:
+        response_json = json.loads(response)
+        return response_json.get("is_recipe", False)
+    except:
+        return False
 
 @app.post("/generate")
 async def generate_recipe(request: RecipeRequest):
     try:
         recipe_completion = completion(f"Generate a recipe for {request.recipeRequest}. Include ingredients and steps.")
-
-        recipe_content = recipe_completion.choices[0].message.content
+        if not recipe_completion:
+            raise HTTPException(status_code=400, detail="Failed to generate recipe")
+        if not check_validity(recipe_completion):
+            raise HTTPException(status_code=400, detail="The response was not a recipe.  Try a different prompt.")
 
         # Save to database
         db_recipe = Recipe(
             prompt=request.recipeRequest,
-            content=recipe_content,
+            content=recipe_completion,
         )
         await add_to_db(db_recipe)
 
         return {"recipe": db_recipe}
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to generate recipe")
@@ -79,13 +99,15 @@ async def update_recipe(request: UpdateRequest):
 
         updated_recipe_completion = completion(f"Update the recipe for {old_recipe.content} to include the following preferences: {request.preferences}")
 
-        updated_recipe = updated_recipe_completion.choices[0].message.content
-        if not updated_recipe:
+        if not updated_recipe_completion:
             raise HTTPException(status_code=400, detail="Failed to update recipe")
+
+        if not check_validity(updated_recipe_completion):
+            raise HTTPException(status_code=400, detail="The response was not a recipe.  Try a different prompt.")
 
         db_recipe = Recipe(
             parent_id=request.recipe_id,
-            content=updated_recipe,
+            content=updated_recipe_completion,
             prompt=request.preferences,
         )
         await add_to_db(db_recipe)
@@ -94,6 +116,8 @@ async def update_recipe(request: UpdateRequest):
 
         return {"recipe": db_recipe}
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update recipe")
@@ -119,7 +143,7 @@ async def get_suggestions(recipe_id: str, previous: str = ""):
 
         Make the changes to the following recipe: {recipe.content}
     """, json=True)
-    return {"suggestions": suggestions.choices[0].message.content}
+    return {"suggestions": suggestions}
 
 @app.on_event("startup")
 async def startup():
