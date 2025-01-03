@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 import uvicorn
 import json
+from exa_py import Exa
 
 from db import fetch_children, fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe, update_recipe as update_recipe_in_db
 
@@ -37,6 +38,8 @@ openai_client = OpenAI(
 groq_client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
+exa = Exa(os.getenv("EXA_API_KEY"))
+
 def completion(prompt: str, model: str = "llama3-8b-8192", return_json: bool = False) -> str:
     response = groq_client.chat.completions.create(
         messages=[
@@ -180,6 +183,41 @@ async def get_suggestions(recipe_id: str, previous: str = ""):
 async def get_dish_ideas(current: str = ""):
     dish_ideas = json_completion(f"Return a json array of 12 dish ideas, in the format {{dish_ideas: [string]}}.  The dish ideas should not contain the following: {current}")
     return dish_ideas
+
+@app.get("/scrape")
+async def scrape_from_url(url: str):
+    try:
+        results = exa.get_contents(
+            [url],
+            text=True
+        )
+        result = results.results[0].text
+        if not result:
+            raise HTTPException(status_code=400, detail="Failed to fetch URL")
+
+        recipe_completion = completion(f"""
+            Extract the recipe from this HTML content and format it nicely with ingredients and instructions.
+            Return just the formatted recipe text, without any stories or filler.  Do not say that it is reformatted, but do list {url} as the source.
+
+            {result}
+        """)
+
+        recipe_name = generate_name(recipe_completion)
+
+        db_recipe = Recipe(
+            content=recipe_completion,
+            prompt=f"Scraped from {url}",
+            name=recipe_name
+        )
+        await add_to_db(db_recipe)
+
+        return {"recipe": db_recipe}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error scraping URL: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to scrape recipe from URL")
 
 @app.on_event("startup")
 async def startup():
