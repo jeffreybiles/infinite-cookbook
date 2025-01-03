@@ -15,13 +15,15 @@ export default function LoadRecipe({ id }: { id: string }) {
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [children, setChildren] = useState<Recipe[]>([])
   const [parent, setParent] = useState<Recipe | null>(null)
+  const [related, setRelated] = useState<Recipe[]>([])
   const router = useRouter()
 
   useEffect(() => {
     fetchRecipe(id).then((data) => {
       setRecipe(data.recipe)
-      setChildren(data.children)
-      setParent(data.parent)
+      setRelated(data.related)
+      setParent(data.related.find((r: Recipe) => r.id === data.recipe.parent_id))
+      setChildren(data.related.filter((r: Recipe) => r.parent_id === data.recipe.id))
     })
   }, [])
 

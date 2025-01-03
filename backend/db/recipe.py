@@ -6,6 +6,7 @@ class Recipe(Base):
     __tablename__ = "recipes"
 
     id = Column(Integer, primary_key=True, index=True)
+    original_id = Column(Integer, ForeignKey("recipes.id"), nullable=True)
     prompt = Column(String)
     content = Column(Text)
     name = Column(String)
@@ -21,6 +22,7 @@ class Recipe(Base):
             "name": self.name,
             "created_at": self.created_at.isoformat(),
             "parent_id": self.parent_id,
+            "original_id": self.original_id,
             "is_latest": self.is_latest
         }
 
@@ -39,9 +41,9 @@ async def fetch_recipe(recipe_id: int) -> Recipe | None:
         result = await session.execute(select(Recipe).where(Recipe.id == recipe_id))
         return result.scalar_one_or_none()
 
-async def fetch_children(recipe_id: int) -> list[Recipe]:
+async def fetch_related(recipe: Recipe) -> list[Recipe]:
     async with async_session_maker() as session:
-        result = await session.execute(select(Recipe).where(Recipe.parent_id == recipe_id))
+        result = await session.execute(select(Recipe).where(Recipe.original_id == recipe.original_id))
         return list(result.scalars().all())
 
 async def update_recipe(recipe: Recipe):

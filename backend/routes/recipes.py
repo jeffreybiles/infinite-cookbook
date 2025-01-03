@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from db.recipe import Recipe, add_to_db, fetch_recipe, fetch_children, fetch_recipes, update_recipe as update_recipe_in_db
+from db.recipe import Recipe, add_to_db, fetch_recipe, fetch_related, fetch_recipes, update_recipe as update_recipe_in_db
 from ai_helpers import completion, check_validity, generate_name
 from pydantic import BaseModel
 from fastapi import APIRouter
@@ -85,6 +85,7 @@ async def update_recipe(request: UpdateRequest):
 async def get_recipe(recipe_id: str):
     print(f"Fetching recipe with id: {recipe_id}")
     recipe = await fetch_recipe(int(recipe_id))
-    parent = await fetch_recipe(recipe.parent_id) if recipe.parent_id else None # type: ignore
-    children = await fetch_children(int(recipe_id))
-    return {"recipe": recipe, "children": children, "parent": parent}
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    related = await fetch_related(recipe)
+    return {"recipe": recipe, "related": related}

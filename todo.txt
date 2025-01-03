@@ -1,12 +1,11 @@
-* Basics
-  * Better display of recipe and suggestions in recipe show page (idk how)
 * Add original_id, group everything in the chain
-  * migration to add it + make connections with existing stuff
   * make Previous Recipes page use the linking, group them up - maybe show the chain
   * make the chain show up better at the top of the recipe show page
 * Preferences
   * Have preference options for allergens, spices, ingredients, etc.
   * Start storing preferences based on the modifications.  The allergens and spice level should be saved, as well as things they remove.  What about things they add?
+* Basics
+  * Better display of recipe and suggestions in recipe show page (idk how)
 * Proompting
   * Try JSON Mode, getting array of ingredients/amounts + directions.  This can then be used for styling better than we could with markdown.
 * Fluidity
