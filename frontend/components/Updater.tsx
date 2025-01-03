@@ -66,7 +66,7 @@ useEffect(() => {
               key={suggestion.change}
               className="flex flex-col p-3 border border-gray-300 rounded-md text-left hover:bg-gray-100 transition-colors duration-300 dark:hover:bg-gray-700"
               onClick={() => {
-                updateRecipe(suggestion.change);
+                updateRecipe(`${suggestion.change}. ${suggestion.explanation}`);
               }}
             >
               <h4 className="text-lg font-bold mb-2 mt-0">{suggestion.change}</h4>
