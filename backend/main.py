@@ -9,7 +9,8 @@ import uvicorn
 import json
 from exa_py import Exa
 
-from db import fetch_children, fetch_recipes, fetch_recipe, init_db, add_to_db, Recipe, update_recipe as update_recipe_in_db
+from db.base import init_db
+from db.recipe import fetch_children, fetch_recipes, fetch_recipe, add_to_db, Recipe, update_recipe as update_recipe_in_db
 
 load_dotenv()
 
