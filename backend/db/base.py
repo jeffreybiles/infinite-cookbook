@@ -1,7 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, select, update, text
-from datetime import datetime
 from typing import AsyncGenerator
 
 # Database setup

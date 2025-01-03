@@ -4,7 +4,7 @@ import os
 import sys
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
-from db import async_session_maker
+from db.base import async_session_maker
 
 
 async def migrate_add_name_column():
