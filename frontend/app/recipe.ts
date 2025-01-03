@@ -6,4 +6,5 @@ export type Recipe = {
   id: number;
   is_latest: boolean;
   parent_id: number;
+  original_id: number;
 }
