@@ -4,12 +4,9 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { postRequest } from "@/utils/post-request"
 
-export default function Generator() {
+export default function Generator({ is_custom_input }: { is_custom_input: boolean }) {
     const [chosenRecipeTypes, setChosenRecipeTypes] = useState<string[]>([]);
-    const [showCustomDishDescription, setShowCustomDishDescription] = useState<boolean>(false);
     const [customDishDescription, setCustomDishDescription] = useState<string>("");
-    const [showUrlInput, setShowUrlInput] = useState<boolean>(false);
-    const [url, setUrl] = useState<string>("");
 
     useEffect(() => {
       generateMoreIdeas();
@@ -46,23 +43,11 @@ export default function Generator() {
       setChosenRecipeTypes([...chosenRecipeTypes, ...data.dish_ideas]);
     }
 
-    const scrapeFromUrl = async (url: string) => {
-      const response = await fetch('http://localhost:8000/scrape?url=' + url);
-      const data = await response.json();
-      if (data.recipe.id) {
-        router.push(`/recipe/${data.recipe.id}`);
-        return;
-      }
-    }
-
     return (
       <div className="flex flex-col gap-2 w-full">
-        {showCustomDishDescription ? <div className="flex flex-col gap-2 w-full">
+        {is_custom_input ? <div className="flex flex-col gap-2 w-full">
           <textarea className="border border-gray-300 p-2 rounded-md w-full" placeholder="Describe what you want to eat.  Feel free to go into detail or leave it vague." value={customDishDescription} onChange={(e) => setCustomDishDescription(e.target.value)} />
-          <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateRecipe(customDishDescription)}>Generate</button>
-        </div> : showUrlInput ? <div className="flex flex-col gap-2 w-full">
-          <input className="border border-gray-300 p-2 rounded-md w-full" placeholder="Enter the URL of the recipe you want to generate" value={url} onChange={(e) => setUrl(e.target.value)} />
-          <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => scrapeFromUrl(url)}>Scrape from URL</button>
+          <button className="bg-blue-500 text-white p-2 rounded-md disabled:opacity-50" onClick={() => generateRecipe(customDishDescription)} disabled={customDishDescription === ''}>Generate</button>
         </div> : <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-2">
             {chosenRecipeTypes.map((recipeType) => (
@@ -77,12 +62,7 @@ export default function Generator() {
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateMoreIdeas()}>More ideas</button>
-            <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => setShowCustomDishDescription(true)}>Describe what you want to eat</button>
-            <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => setShowUrlInput(true)}>Get recipe from URL</button>
-
-          </div>
+          <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateMoreIdeas()}>More ideas</button>
         </>}
         {loadingMessage && <p className="text-center">{loadingMessage}</p>}
       </div>

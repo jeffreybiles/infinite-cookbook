@@ -1,5 +1,4 @@
 * Basics
-  * Separate sections on home page so it shows the URL options easier
   * Better display of recipe and suggestions in recipe show page (idk how)
 * Add original_id, group everything in the chain
   * migration to add it + make connections with existing stuff
