@@ -166,7 +166,7 @@ export default function Generator() {
             {chosenRecipeTypes.map((recipeType) => (
               <div className="col-span-1" key={recipeType}>
               <button
-                className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full h-full hover:bg-gray-100 transition-colors duration-300 disabled:opacity-50"
+                className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full h-full hover:bg-gray-100 transition-colors duration-300 disabled:opacity-50 dark:hover:bg-gray-700"
                 onClick={() => generateRecipe(recipeType)}
                 disabled={loadingMessage !== ''}
               >

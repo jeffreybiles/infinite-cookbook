@@ -19,7 +19,12 @@ export default function RecipeList() {
 
   return <div className="flex flex-col gap-2">
     {recipes.map((recipe) => <div key={recipe.id}>
-      <Link href={`/recipe/${recipe.id}`} className="hover:bg-gray-100 transition-colors duration-300 p-2 rounded-md">{recipe.name || recipe.prompt}</Link>
+      <Link
+        href={`/recipe/${recipe.id}`}
+        className="hover:bg-gray-100 transition-colors duration-300 p-2 rounded-md dark:hover:bg-gray-700"
+      >
+        {recipe.name || recipe.prompt}
+      </Link>
     </div>)}
   </div>
 }
