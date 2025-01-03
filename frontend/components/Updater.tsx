@@ -20,8 +20,7 @@ export default function Updater({ recipe_id }: { recipe_id: string }) {
   const loadSuggestions = async () => {
     const response = await fetch(`http://localhost:8000/recipe/${recipe_id}/suggestions?previous=${suggestions.map(s => s.change).join(',')}`);
     const data = await response.json();
-    const sgg = JSON.parse(data.suggestions);
-    setSuggestions([...suggestions, ...sgg.suggestions]);
+    setSuggestions([...suggestions, ...data.suggestions]);
   }
 
 useEffect(() => {

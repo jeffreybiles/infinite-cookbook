@@ -37,32 +37,43 @@ openai_client = OpenAI(
 groq_client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
-def completion(prompt: str, model: str = "llama3-8b-8192", json: bool = False) -> str:
+def completion(prompt: str, model: str = "llama3-8b-8192", return_json: bool = False) -> str:
     response = groq_client.chat.completions.create(
         messages=[
             {"role": "user", "content": prompt}
         ],
         model=model,
-        response_format={"type": "json_object"} if json else None
+        response_format={"type": "json_object"} if return_json else None
     )
+
     return response.choices[0].message.content or ''
 
+def json_completion(prompt: str, model: str = "llama3-8b-8192", max_retries: int = 3) -> dict:
+    for attempt in range(max_retries):
+        try:
+            content = completion(prompt, model, return_json=True)
+            return json.loads(content)
+        except json.JSONDecodeError as e:
+            if attempt == max_retries - 1:  # Last attempt
+                print(f"Failed to parse JSON after {max_retries} attempts. Last error: {str(e)}")
+                return {}
+            print(f"Attempt {attempt + 1} failed, retrying...")
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}")
+            return {}
+    raise HTTPException(status_code=500, detail="Failed to create JSON")
+
 def check_validity(recipe: str):
-    response = completion(
+    response = json_completion(
         f"Check if the following is a recipe that is used for cooking.  Return json {{is_recipe: boolean}}: {recipe}",
-        json=True,
         model="llama-3.1-8b-instant"
         # This model has higher per-minute token limits, and also doesn't count against the 6k/minute limit on 3.3-70b-specdec
         # It doesn't need to be as advanced, it just needs to accurately check if it's a recipe
     )
-    try:
-        response_json = json.loads(response)
-        return response_json.get("is_recipe", False)
-    except:
-        return False
+    return response.get("is_recipe", False)
 
 def generate_name(recipe: str):
-    response = completion(
+    response = json_completion(
         f"""You must return a valid JSON object with exactly this format: {{"name": "Recipe Name Here"}}
 
         Generate a short, descriptive name for this recipe: {recipe}
@@ -72,9 +83,8 @@ def generate_name(recipe: str):
         - The response must be a valid JSON object
         - The name should be concise (3-6 words)""",
         model="llama-3.1-8b-instant",
-        json=True
     )
-    return json.loads(response).get("name", "")
+    return response.get("name", "")
 
 @app.post("/generate")
 async def generate_recipe(request: RecipeRequest):
@@ -157,23 +167,19 @@ async def get_suggestions(recipe_id: str, previous: str = ""):
     recipe = await fetch_recipe(int(recipe_id))
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
-    suggestions = completion(f"""
+    suggestions = json_completion(f"""
         Return a json array of 4 possible changes or improvements, in the format {{suggestions: [{{change: string, explanation: string}}]}}
 
         The changes should be just 2-3 words, and the following are not repeated: {previous_changes}
 
         Make the changes to the following recipe: {recipe.content}
-    """, json=True)
-    return {"suggestions": suggestions}
+    """)
+    return suggestions
 
 @app.get("/dish-ideas")
 async def get_dish_ideas(current: str = ""):
-    dish_ideas = completion(f"Return a json array of 12 dish ideas, in the format {{dish_ideas: [string]}}.  The dish ideas should not contain the following: {current}", json=True)
-    print(f"Dish ideas: {dish_ideas}")
-    try:
-        return json.loads(dish_ideas)
-    except:
-        return {"dish_ideas": []}
+    dish_ideas = json_completion(f"Return a json array of 12 dish ideas, in the format {{dish_ideas: [string]}}.  The dish ideas should not contain the following: {current}")
+    return dish_ideas
 
 @app.on_event("startup")
 async def startup():
