@@ -13,6 +13,7 @@ async def migrate_populate_original_id():
         for root in roots:
           root_id = root.id
           result = await session.execute(text("SELECT id FROM recipes WHERE parent_id = :id"), {"id": root.id})
+          await session.execute(text("UPDATE recipes SET original_id = :id WHERE id = :root_id"), {"id": root_id, "root_id": root_id})
           children = []
           children.extend(result.scalars().all())
 
