@@ -31,6 +31,8 @@ async def generate_recipe(request: RecipeRequest):
             name=recipe_name,
         )
         await add_to_db(db_recipe)
+        db_recipe.original_id = db_recipe.id
+        await update_recipe_in_db(db_recipe)
 
         return {"recipe": db_recipe}
 
@@ -68,6 +70,7 @@ async def update_recipe(request: UpdateRequest):
             content=updated_recipe_completion,
             prompt=request.preferences,
             name=recipe_name,
+            original_id=old_recipe.original_id,
         )
         await add_to_db(db_recipe)
         old_recipe.is_latest = False # type: ignore

@@ -1,6 +1,3 @@
-* Add original_id, group everything in the chain
-  * make Previous Recipes page use the linking, group them up - maybe show the chain
-  * make the chain show up better at the top of the recipe show page
 * Preferences
   * Have preference options for allergens, spices, ingredients, etc.
   * Start storing preferences based on the modifications.  The allergens and spice level should be saved, as well as things they remove.  What about things they add?
@@ -13,3 +10,4 @@
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes
 * Deploy
+* When showing chain, make branching clearer
