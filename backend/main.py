@@ -162,7 +162,7 @@ async def get_recipe(recipe_id: str):
     recipe = await fetch_recipe(int(recipe_id))
     parent = await fetch_recipe(recipe.parent_id) if recipe.parent_id else None # type: ignore
     children = await fetch_children(int(recipe_id))
-    return {"recipe": recipe, "parent": parent, "children": children}
+    return {"recipe": recipe, "children": children}
 
 @app.get("/recipe/{recipe_id}/suggestions")
 async def get_suggestions(recipe_id: str, previous: str = ""):

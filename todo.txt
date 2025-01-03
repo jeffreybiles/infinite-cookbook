@@ -7,4 +7,7 @@
   * Streaming content for the recipes
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes
+* Improve speed
+  * Save the list of suggestions on a
+* Deploy
 * Bonus: make a 'chain' that's visible all at once.  And I guess branching?  This could be challenging on the database as currently constructed
