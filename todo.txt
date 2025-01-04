@@ -1,6 +1,3 @@
-* Preferences v1
-  * Preference page with common restrictions (peanut, gluten, vegan, kosher, halal, etc.), spice level preference, a list of foods you want to avoid, and a list of foods you enjoy.  JSON in localhost for now
-  * Integrate preferences into recipe creation and suggestion creation.  Have to send up with every request for now.
 * Basics
   * Error messages show on front page
   * Better display of recipe and suggestions in recipe show page (idk how)
@@ -10,6 +7,7 @@
   * Streaming content for the recipes
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes
+* Switch to UV
 * Deploy
 * Auth
 * Preferences v2

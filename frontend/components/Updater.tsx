@@ -1,6 +1,7 @@
 "use client"
 
 import { postRequest } from "@/utils/post-request";
+import { getPreferences } from "@/utils/preferences";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -32,7 +33,7 @@ useEffect(() => {
           setLoadingMessage('Updating recipe with your preferences...');
           setErrorMessage('');
           const changes = change ? change : preferences;
-          const response = await postRequest('update', { recipe_id: recipe_id, preferences: changes });
+          const response = await postRequest('update', { recipe_id: recipe_id, modifications: changes, preferences: getPreferences() });
 
           const data = await response.json();
           if (!response.ok) {

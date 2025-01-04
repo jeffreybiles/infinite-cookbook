@@ -2,13 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getPreferences } from "@/utils/preferences";
+import { postRequest } from "@/utils/post-request";
 
 export default function Scraper() {
   const [url, setUrl] = useState('');
   const router = useRouter();
 
   const scrapeFromUrl = async (url: string) => {
-    const response = await fetch('http://localhost:8000/scrape?url=' + url);
+    const preferences = getPreferences();
+    const response = await postRequest(`scrape`, {
+      preferences: preferences,
+      url: url
+    });
     const data = await response.json();
     if (data.recipe.id) {
       router.push(`/recipe/${data.recipe.id}`);

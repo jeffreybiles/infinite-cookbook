@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { postRequest } from "@/utils/post-request"
+import { getPreferences } from "@/utils/preferences"
 
 export default function Generator({ is_custom_input }: { is_custom_input: boolean }) {
     const [chosenRecipeTypes, setChosenRecipeTypes] = useState<string[]>([]);
@@ -18,7 +19,8 @@ export default function Generator({ is_custom_input }: { is_custom_input: boolea
     const generateRecipe = async (recipeName: string) => {
       try {
         setLoadingMessage('Generating recipe...');
-        const response = await postRequest('generate', { recipeRequest: recipeName });
+        const options = getPreferences();
+        const response = await postRequest('generate', { recipeRequest: recipeName, preferences: options });
 
         if (!response.ok) {
           throw new Error('Failed to generate recipe');

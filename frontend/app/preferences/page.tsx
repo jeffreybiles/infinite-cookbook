@@ -1,29 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Options, avoidOptions, spiceLevels, lifestyleOptions, localStorageKey } from "@/utils/preferences"
 
-const avoidOptions = ["peanuts", "gluten", "dairy", "eggs", "fish", "shellfish", "seed oils","soy", "tree nuts", "alcohol", "caffeine", "sugar", "salt", "artificial sweeteners"]
-// const likeList = ["spicy", "sweet", "salty", "sour", "bitter", "umami"]
-const spiceLevels = ["mild", "medium", "hot", "very hot"]
-const lifestyleOptions = ["vegan", "vegetarian", "halal", "kosher", "paleo", "keto", "low-carb", "low-fat"]
-
-type Options = { avoid: string[], lifestyle: string[], spiceLevel: string | null, custom: string }
 export default function Preferences() {
   const [options, setOptions] = useState<Options>({ avoid: [], lifestyle: [], spiceLevel: null, custom: "" })
 
   useEffect(() => {
-    console.log("loading preferences")
     if (typeof window !== 'undefined') {
-      console.log("loading preferences from localStorage")
-      const saved = localStorage.getItem('userPreferences')
-      console.log("loading", saved)
-      setOptions(saved ? JSON.parse(saved) : { avoid: [], lifestyle: [], spiceLevel: null, custom: "" })
+      const saved = localStorage.getItem(localStorageKey)
+      if (saved) {
+        setOptions(JSON.parse(saved))
+      }
     }
   }, [])
 
   const savePreferences = (newOptions: Options) => {
     setOptions(newOptions)
-    localStorage.setItem('userPreferences', JSON.stringify(newOptions))
+    localStorage.setItem(localStorageKey, JSON.stringify(newOptions))
   }
 
   const updateAvoidList = (item: string) => {
