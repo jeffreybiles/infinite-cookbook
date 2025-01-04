@@ -22,7 +22,7 @@ export default function Scraper() {
     }
   }
   return <div className="flex flex-col gap-2 w-full">
-    <input
+    <textarea
       className="border border-gray-300 p-2 rounded-md w-full"
       placeholder="Found a good recipe somewhere else? Enter the URL and we can start customizing it!"
       value={url} onChange={(e) => setUrl(e.target.value)}
