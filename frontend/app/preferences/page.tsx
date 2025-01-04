@@ -1,32 +1,52 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-const avoidOptions = ["peanuts", "gluten", "dairy", "eggs", "fish", "shellfish", "soy", "tree nuts", "alcohol", "caffeine", "sugar", "salt", "artificial sweeteners"]
+const avoidOptions = ["peanuts", "gluten", "dairy", "eggs", "fish", "shellfish", "seed oils","soy", "tree nuts", "alcohol", "caffeine", "sugar", "salt", "artificial sweeteners"]
 // const likeList = ["spicy", "sweet", "salty", "sour", "bitter", "umami"]
 const spiceLevels = ["mild", "medium", "hot", "very hot"]
 const lifestyleOptions = ["vegan", "vegetarian", "halal", "kosher", "paleo", "keto", "low-carb", "low-fat"]
 
+type Options = { avoid: string[], lifestyle: string[], spiceLevel: string | null, custom: string }
 export default function Preferences() {
-  const [options, setOptions] = useState<{ avoid: string[], lifestyle: string[], spiceLevel: string | null, custom: string }>({ avoid: [], lifestyle: [], spiceLevel: null, custom: "" })
+  const [options, setOptions] = useState<Options>({ avoid: [], lifestyle: [], spiceLevel: null, custom: "" })
+
+  useEffect(() => {
+    console.log("loading preferences")
+    if (typeof window !== 'undefined') {
+      console.log("loading preferences from localStorage")
+      const saved = localStorage.getItem('userPreferences')
+      console.log("loading", saved)
+      setOptions(saved ? JSON.parse(saved) : { avoid: [], lifestyle: [], spiceLevel: null, custom: "" })
+    }
+  }, [])
+
+  const savePreferences = (newOptions: Options) => {
+    setOptions(newOptions)
+    localStorage.setItem('userPreferences', JSON.stringify(newOptions))
+  }
 
   const updateAvoidList = (item: string) => {
     const avoidList = options.avoid.includes(item) ? options.avoid.filter((i) => i !== item) : [...options.avoid, item]
-    setOptions({ ...options, avoid: avoidList })
+    const newOptions = { ...options, avoid: avoidList }
+    savePreferences(newOptions)
   }
 
   const updateLifestyleList = (item: string) => {
     const lifestyleList = options.lifestyle.includes(item) ? options.lifestyle.filter((i) => i !== item) : [...options.lifestyle, item]
-    setOptions({ ...options, lifestyle: lifestyleList })
+    const newOptions = { ...options, lifestyle: lifestyleList }
+    savePreferences(newOptions)
   }
 
   const updateSpiceLevel = (level: string) => {
     const newLevel = options.spiceLevel == level ? null : level
-    setOptions({ ...options, spiceLevel: newLevel })
+    const newOptions = { ...options, spiceLevel: newLevel }
+    savePreferences(newOptions)
   }
 
   const updateCustom = (custom: string) => {
-    setOptions({ ...options, custom: custom })
+    const newOptions = { ...options, custom: custom }
+    savePreferences(newOptions)
   }
 
   return <div className="container mx-auto p-4">
