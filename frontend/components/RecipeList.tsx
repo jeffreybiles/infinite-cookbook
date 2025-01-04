@@ -29,7 +29,7 @@ export default function RecipeList() {
   return <div className="flex flex-col gap-2">
     {groupedRecipes.map(([original_id, recipes]) =>
       <div key={original_id} className="border border-gray-200 p-2 flex flex-row gap-2">
-        <div className="text-lg font-bold">{original_id}</div>
+        <div className="font-bold">{original_id}</div>
         <div className="flex flex-col gap-2">
           {recipes.map((recipe) => <div key={recipe.id}>
             <Link

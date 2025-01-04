@@ -38,12 +38,16 @@ def json_completion(prompt: str, model: str = "llama3-8b-8192", max_retries: int
 
 def check_validity(recipe: str):
     response = json_completion(
-        f"Check if the following is a recipe that is used for cooking.  Return json {{is_recipe: boolean}}: {recipe}",
+        f"""Check if the following is in a recipe format, and is a valid food dish that can be served.
+        Return json {{is_recipe: boolean, is_food: boolean}}
+
+        {recipe}
+        """,
         model="llama-3.1-8b-instant"
         # This model has higher per-minute token limits, and also doesn't count against the 6k/minute limit on 3.3-70b-specdec
         # It doesn't need to be as advanced, it just needs to accurately check if it's a recipe
     )
-    return response.get("is_recipe", False)
+    return response.get("is_recipe", False) and response.get("is_food", False)
 
 def generate_name(recipe: str):
     response = json_completion(

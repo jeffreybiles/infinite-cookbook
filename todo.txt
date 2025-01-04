@@ -1,6 +1,6 @@
-* Preferences
-  * Have preference options for allergens, spices, ingredients, etc.
-  * Start storing preferences based on the modifications.  The allergens and spice level should be saved, as well as things they remove.  What about things they add?
+* Preferences v1
+  * Preference page with common restrictions (peanut, gluten, vegan, kosher, halal, etc.), spice level preference, a list of foods you want to avoid, and a list of foods you enjoy.  JSON in localhost for now
+  * Integrate preferences into recipe creation and suggestion creation.  Have to send up with every request for now.
 * Basics
   * Better display of recipe and suggestions in recipe show page (idk how)
 * Proompting
@@ -10,4 +10,8 @@
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes
 * Deploy
+* Auth
+* Preferences v2
+  * Start storing preferences based on the modifications?
+  * Have a liking/disliking aspect, which then gets worked into a RAG system?
 * When showing chain, make branching clearer
