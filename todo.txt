@@ -1,16 +1,14 @@
-* Basics
-  * Error messages show on front page
-  * Better display of recipe and suggestions in recipe show page (idk how)
-* Proompting
-  * Try JSON Mode, getting array of ingredients/amounts + directions.  This can then be used for styling better than we could with markdown.
-* Fluidity
-  * Streaming content for the recipes
-  * Animations for going between existing recipes
-  * Animations for when waiting + when selecting changes
 * Switch to UV
 * Deploy
+* Fluidity
+  * Animations for going between existing recipes
+  * Animations for when waiting + when selecting changes
 * Auth
+* Save preferences on the backend, with the user (and then can remove them from the post requests!)
 * Preferences v2
   * Start storing preferences based on the modifications?
   * Have a liking/disliking aspect, which then gets worked into a RAG system?
-* When showing chain, make branching clearer
+* Design improvements
+  * Better display of recipe and suggestions in recipe show page (idk how)
+  * When showing chain, make branching clearer
+  * Consider JSON Mode for the recipes, getting array of ingredients/amounts + directions.  This can then be used for styling better than we could with markdown.

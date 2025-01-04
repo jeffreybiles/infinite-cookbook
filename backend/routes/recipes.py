@@ -182,4 +182,4 @@ async def scrape_from_url(request: ScrapeRequest):
         raise
     except Exception as e:
         print(f"Error scraping URL: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to scrape recipe from URL")
+        raise HTTPException(status_code=500, detail="Failed to scrape recipe from URL.  Please ensure the URL is valid and try again.")

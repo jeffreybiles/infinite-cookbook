@@ -8,6 +8,7 @@ import { getPreferences } from "@/utils/preferences"
 export default function Generator({ is_custom_input }: { is_custom_input: boolean }) {
     const [chosenRecipeTypes, setChosenRecipeTypes] = useState<string[]>([]);
     const [customDishDescription, setCustomDishDescription] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
 
     useEffect(() => {
       generateMoreIdeas();
@@ -19,21 +20,22 @@ export default function Generator({ is_custom_input }: { is_custom_input: boolea
     const generateRecipe = async (recipeName: string) => {
       try {
         setLoadingMessage('Generating recipe...');
+        setErrorMessage('');
         const options = getPreferences();
         const response = await postRequest('generate', { recipeRequest: recipeName, preferences: options });
 
+        const data = await response.json();
         if (!response.ok) {
-          throw new Error('Failed to generate recipe');
+          throw new Error(data.detail || 'Failed to generate recipe');
         }
         setLoadingMessage('Recipe generated!  Sending it to you...');
 
-        const data = await response.json();
         if (data.recipe.id) {
           router.push(`/recipe/${data.recipe.id}`);
           return;
         }
       } catch (error) {
-        console.error('Error:', error);
+        setErrorMessage('' + error);
       } finally {
         setLoadingMessage('');
       }
@@ -67,6 +69,7 @@ export default function Generator({ is_custom_input }: { is_custom_input: boolea
           <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => generateMoreIdeas()}>More ideas</button>
         </>}
         {loadingMessage && <p className="text-center">{loadingMessage}</p>}
+        {errorMessage && <p className="text-center text-red-500">{errorMessage}</p>}
       </div>
     );
 }
