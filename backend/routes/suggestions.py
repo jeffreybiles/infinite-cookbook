@@ -16,6 +16,8 @@ async def get_suggestions(recipe_id: str, previous: str = ""):
 
         The changes should be just 2-3 words, and the following are not repeated: {previous_changes}
 
+        The changes should usually be about the ingredients, but 1 of the 4 could be about the instructions or other aspects of the recipe.
+
         Make the changes to the following recipe: {recipe.content}
     """)
     return suggestions
