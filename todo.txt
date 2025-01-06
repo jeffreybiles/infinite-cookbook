@@ -1,5 +1,7 @@
 * Switch to UV
 * Deploy
+  * Create Dockerfiles
+  * Do terraform setup
 * Fluidity
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes
