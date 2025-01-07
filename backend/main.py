@@ -1,11 +1,17 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
 from routes import recipes, suggestions
 import uvicorn
 from db.base import init_db
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # Add CORS middleware
 app.add_middleware(
@@ -20,10 +26,8 @@ app.include_router(recipes.router)
 app.include_router(suggestions.router)
 
 
-@app.on_event("startup")
-async def startup():
-    await init_db()
+handler = Mangum(app)
 
 if __name__ == "__main__":
     print("Starting server")
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run('main:app', host="0.0.0.0", port=8000, reload=True)

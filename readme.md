@@ -7,7 +7,12 @@ The goals of this project are to:
 
 This contains two parts:
 1. NextJS frontend
+  * Go to /frontend folder
+  * Run `npm install && npm run dev`
 2. FastAPI backend
+  * Go to /backend folder
+  * Run `pip install -r requirements.txt && uvicorn main:app --reload`
+  * OR run `docker build -t infinite_cookbook_dev -f Dockerfile.dev . && docker run -p 8000:8000 -v  ~/.aws:/root/.aws  infinite_cookbook_dev/`
 
 NextJS was chosen because it was familiar and I do not want to learn anything new on the frontend for this project.  If deploying to AWS is too much of a pain, I may switch to Remix or plain React.  I could have also done the LLM API calls in NextJS backend endpoints, but I want to familiarize myself with the Python ecosystem, since most ML and AI is done there.
 
