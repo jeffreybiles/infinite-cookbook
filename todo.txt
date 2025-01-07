@@ -1,7 +1,9 @@
 * Switch to UV
 * Deploy
-  * Create Dockerfiles
   * Do terraform setup
+  * Add back VPC and subnet, for security, before sharing with anyone
+  * Move secrets from Github Secrets to SSM Parameter Store or AWS Secrets Manager?
+  * Get frontend in terraform or equivalent, running on AWS
 * Fluidity
   * Animations for going between existing recipes
   * Animations for when waiting + when selecting changes

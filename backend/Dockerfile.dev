@@ -1,0 +1,14 @@
+FROM public.ecr.aws/lambda/python:3.12
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt --upgrade
+
+EXPOSE 8000
+
+RUN mkdir -p /root/.aws
+
+ENV DATABASE_URL="postgresql+asyncpg://postgres@host.docker.internal:5432/recipes"
+
+COPY . .
+
+ENTRYPOINT ["python", "main.py"]

@@ -11,16 +11,58 @@ This contains two parts:
 
 NextJS was chosen because it was familiar and I do not want to learn anything new on the frontend for this project.  If deploying to AWS is too much of a pain, I may switch to Remix or plain React.  I could have also done the LLM API calls in NextJS backend endpoints, but I want to familiarize myself with the Python ecosystem, since most ML and AI is done there.
 
----
+**At the current stage, this app does not follow best software-engineering practices!**
+
+# How to run
+
+### Backend
+
+Requirements:
+* Python must be installed
+* Postgres must be running at localhost:5432
+
+First, create the file `backend/.env` and put in the `GROQ_API_KEY` (sign up at https://groq.com/)
+
+Then install the required packages and start running the app.  Python must be installed.
+
+```
+$ cd backend
+$ pip install -r requirements.txt
+$ python scripts/create_db.py
+$ alembic upgrade head
+$ uvicorn main:app --reload
+```
+
+To test, go to localhost:8000/docs and you should see a set of FastAPI endpoints listed
+
+If this doesn't work, it's possible that I skipped a step in the instructions (it's been 8 years since I did production Python).  If you know what the skipped step is, please open a PR updating this readme!
+
+You could also run with Docker
+
+```
+$ docker build -t infinite_cookbook_dev -f Dockerfile.dev .
+$ docker run -p 8000:8000 -v  ~/.aws:/root/.aws  infinite_cookbook_dev/
+```
+
+If neither of these work, you could try going backe to commit c6e2fcc255566419cf634a3da7dafe17e327bbf3, where we're using SQLite!
+
+### Frontend
+
+```
+$ cd frontend
+$ npm install
+$ npm run dev
+```
+
+# Plan
 
 We will use LLM generation for the following:
+* Generating the initial recipe ideas
 * Generating the initial recipes
 * Generating/choosing the edit suggestions
 * Updating the recipes
 * Checking for validity
 
-There will also be light tool use:
-* Scraping to find recipes on a specific page given to it
-* Send email with recipe to the user (or this could just be a regular email handler?)
+There will also use other AI tools, such as scraping to find recipes on a specific web page.
 
-We will create a memory system to save preferences.  It could be just a prompt that is updated, but it could also be structured.  The structure I'm thinking of is an array of ingredient likes/dislikes, spice/flavor preference ratings, and an array of dietary restrictions.  This will be updated automatically by the edits they choose.
+A system of preferences will be saved that helps generate foods more in line with the user's wants.  Currently it will be set directly by the user, but in the future we could create a memory system that updates preferences based on the actions the user takes within the app.

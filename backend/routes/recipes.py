@@ -7,6 +7,9 @@ from exa_py import Exa
 import os
 from dotenv import load_dotenv
 from typing_extensions import List, Optional, TypedDict
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -51,9 +54,9 @@ def preferences_prompt(preferences: Preferences):
 @router.post("/generate")
 async def generate_recipe(request: RecipeRequest):
     try:
-        recipe_completion = completion(f"""Generate a recipe for {request.recipeRequest}. Include ingredients and steps.
-
-        {preferences_prompt(request.preferences)}
+        recipe_completion = completion(f"""
+            Generate a recipe for {request.recipeRequest}. Include ingredients and steps.
+            {preferences_prompt(request.preferences)}
         """)
         if not recipe_completion:
             raise HTTPException(status_code=400, detail="Failed to generate recipe")
@@ -83,8 +86,14 @@ async def generate_recipe(request: RecipeRequest):
 
 @router.get("/recipes")
 async def get_recipes():
-    recipes = await fetch_recipes()
-    return {"recipes": recipes}
+    logger.info("Fetching recipes")
+    try:
+        recipes = await fetch_recipes()
+        logger.info(f"Successfully fetched {len(recipes)} recipes")
+        return recipes
+    except Exception as e:
+        logger.error(f"Error fetching recipes: {str(e)}")
+        raise
 
 @router.post("/update")
 async def update_recipe(request: UpdateRequest):

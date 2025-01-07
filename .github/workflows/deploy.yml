@@ -1,0 +1,79 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: infinite-cookbook-api
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./terraform/backend
+        run: |
+          terraform init \
+            -backend-config="bucket=infinite-cookbook-terraform-state" \
+            -backend-config="key=backend.tfstate" \
+            -backend-config="region=us-east-1"
+            # -backend-config="dynamodb_table=infinite-cookbook-terraform-state-lock"
+
+
+      - name: Debug Terraform State
+        working-directory: ./terraform/backend
+        run: |
+          echo "Listing S3 bucket contents:"
+          aws s3 ls s3://infinite-cookbook-terraform-state/
+          echo "Current Terraform state:"
+          terraform show
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image to Amazon ECR
+        working-directory: ./backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build --platform linux/amd64 -f Dockerfile.lambda -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+
+      - name: Terraform Apply
+        working-directory: ./terraform/backend
+        env:
+          TF_LOG: INFO
+        run: |
+          terraform apply -auto-approve \
+            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+            -var="github_repo=${{ github.repository }}" \
+            -var="db_password=${{ env.DB_PASSWORD }}" \
+            -var="groq_api_key=${{ env.GROQ_API_KEY }}" \
+            -var="exa_api_key=${{ env.EXA_API_KEY }}"
