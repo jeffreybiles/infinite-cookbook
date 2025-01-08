@@ -27,6 +27,20 @@ jobs:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github-actions
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./terraform/backend
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ./terraform/backend
+        run: |
+          terraform apply -auto-approve \
+            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+            -var="github_repo=${{ github.repository }}"
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -41,17 +55,3 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init
-        working-directory: ./terraform/backend
-        run: terraform init
-
-      - name: Terraform Apply
-        working-directory: ./terraform/backend
-        run: |
-          terraform apply -auto-approve \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
-            -var="github_repo=${{ github.repository }}"
