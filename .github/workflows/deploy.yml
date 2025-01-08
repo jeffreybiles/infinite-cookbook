@@ -36,8 +36,10 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ./terraform/backend
+        env:
+          TF_LOG: INFO
         run: |
-          terraform apply -auto-approve \
+          terraform apply -verbose -auto-approve \
             -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
             -var="github_repo=${{ github.repository }}"
 
