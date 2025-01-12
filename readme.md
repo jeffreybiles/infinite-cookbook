@@ -37,6 +37,8 @@ To test, go to localhost:8000/docs and you should see a set of FastAPI endpoints
 
 If this doesn't work, it's possible that I skipped a step in the instructions (it's been 8 years since I did production Python).  If you know what the skipped step is, please open a PR updating this readme!
 
+You could also try going back to commit c6e2fcc255566419cf634a3da7dafe17e327bbf3, where we're using SQLite!
+
 
 ### Frontend
 
