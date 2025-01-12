@@ -44,8 +44,6 @@ def check_validity(recipe: str):
         {recipe}
         """,
         model="llama-3.1-8b-instant"
-        # This model has higher per-minute token limits, and also doesn't count against the 6k/minute limit on 3.3-70b-specdec
-        # It doesn't need to be as advanced, it just needs to accurately check if it's a recipe
     )
     return response.get("is_recipe", False) and response.get("is_food", False)
 

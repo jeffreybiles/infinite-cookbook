@@ -51,9 +51,9 @@ def preferences_prompt(preferences: Preferences):
 @router.post("/generate")
 async def generate_recipe(request: RecipeRequest):
     try:
-        recipe_completion = completion(f"""Generate a recipe for {request.recipeRequest}. Include ingredients and steps.
-
-        {preferences_prompt(request.preferences)}
+        recipe_completion = completion(f"""
+            Generate a recipe for {request.recipeRequest}. Include ingredients and steps.
+            {preferences_prompt(request.preferences)}
         """)
         if not recipe_completion:
             raise HTTPException(status_code=400, detail="Failed to generate recipe")

@@ -24,5 +24,8 @@ async def get_suggestions(recipe_id: str, previous: str = ""):
 
 @router.get("/dish-ideas")
 async def get_dish_ideas(current: str = ""):
-    dish_ideas = json_completion(f"Return a json array of 12 dish ideas, in the format {{dish_ideas: [string]}}.  The dish ideas should not contain the following: {current}")
+    dish_ideas = json_completion(f"""
+        Return a json array of 12 dish ideas, in the format {{dish_ideas: [string]}}.
+        The dish ideas should not contain the following: {current}
+    """)
     return dish_ideas

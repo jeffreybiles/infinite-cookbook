@@ -1,4 +1,3 @@
-openai==1.57.0
 fastapi==0.115.6
 sqlalchemy==2.0.34
 groq==0.13.1
