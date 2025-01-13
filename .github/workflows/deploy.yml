@@ -35,12 +35,17 @@ jobs:
         working-directory: ./terraform/backend
         run: terraform init
 
-      - name: Import existing IAM role if needed
+      - name: Import existing Lambda IAM role if needed
         working-directory: ./terraform/backend
-        continue-on-error: true  # Continue if the role doesn't exist yet
+        continue-on-error: true
         run: |
-          terraform import aws_iam_role.lambda_exec infinite-cookbook-lambda \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}"
+          terraform import -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" aws_iam_role.lambda_exec infinite-cookbook-lambda
+
+      - name: Import existing GitHub Actions IAM role if needed
+        working-directory: ./terraform/backend
+        continue-on-error: true
+        run: |
+          terraform import -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" aws_iam_role.github_actions github-actions
 
       - name: Terraform Apply
         working-directory: ./terraform/backend
