@@ -28,9 +28,7 @@ resource "aws_lambda_function" "api" {
   skip_destroy  = false
   reserved_concurrent_executions = -1
   publish = false
-  tracing_config {}
   ephemeral_storage {}
-  logging_config {}
 
   environment {
     variables = {
