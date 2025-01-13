@@ -22,8 +22,6 @@ resource "aws_iam_role" "github_actions" {
       }
     ]
   })
-
-  aws_iam_role_policy {}
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_ecr" {

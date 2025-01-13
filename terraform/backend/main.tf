@@ -59,8 +59,6 @@ resource "aws_iam_role" "lambda_exec" {
       }
     ]
   })
-
-  aws_iam_role_policy {}
 }
 
 # API Gateway
