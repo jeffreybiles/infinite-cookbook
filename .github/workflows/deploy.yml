@@ -51,6 +51,8 @@ jobs:
         run: |
           terraform import \
             -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+            -var="db_password=${{ env.DB_PASSWORD }}" \
+            -var="github_repo=${{ github.repository }}" \
             aws_iam_role.github_actions github-actions
 
       - name: Terraform Apply
