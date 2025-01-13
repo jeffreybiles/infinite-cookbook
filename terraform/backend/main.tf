@@ -16,6 +16,11 @@ resource "aws_ecr_repository" "app" {
   name = "infinite-cookbook-api"
   image_tag_mutability = "MUTABLE"
   force_delete = true
+
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes = [name]
+  }
 }
 
 # Lambda Function
