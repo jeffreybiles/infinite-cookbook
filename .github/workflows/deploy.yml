@@ -55,6 +55,13 @@ jobs:
             -var="github_repo=${{ github.repository }}" \
             aws_iam_role.github_actions github-actions
 
+
+      - name: Import existing ECR repository if needed
+        working-directory: ./terraform/backend
+        continue-on-error: true
+        run: |
+          terraform import aws_ecr_repository.app infinite-cookbook-api
+
       - name: Terraform Apply
         working-directory: ./terraform/backend
         env:
