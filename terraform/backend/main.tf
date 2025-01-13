@@ -60,7 +60,7 @@ resource "aws_iam_role" "lambda_exec" {
     ]
   })
 
-  inline_policy {}
+  aws_iam_role_policy {}
 }
 
 # API Gateway

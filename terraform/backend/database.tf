@@ -18,7 +18,6 @@ resource "aws_db_instance" "postgres" {
   apply_immediately = false
   delete_automated_backups = true
   auto_minor_version_upgrade = true
-  dedicated_log_group = false
   monitoring_interval = 0
   copy_tags_to_snapshot = false
   performance_insights_enabled = false
