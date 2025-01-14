@@ -52,17 +52,6 @@ resource "aws_iam_role_policy_attachment" "github_actions_iam" {
   policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "github_actions_vpc" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
-}
-
-# Temporarily use the AWS-managed policy for EC2 security groups
-resource "aws_iam_role_policy_attachment" "github_actions_ec2_security_group" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
-}
-
 resource "aws_iam_role_policy" "github_actions_security_groups" {
   name = "security-groups-management"
   role = aws_iam_role.github_actions.name
@@ -82,6 +71,41 @@ resource "aws_iam_role_policy" "github_actions_security_groups" {
           "ec2:RevokeSecurityGroupIngress",
           "ec2:AuthorizeSecurityGroupEgress",
           "ec2:RevokeSecurityGroupEgress"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "github_actions_vpc_explicit" {
+  name = "vpc-explicit-permissions"
+  role = aws_iam_role.github_actions.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:DescribeVpcs",
+          "ec2:ModifyVpcAttribute",
+          "ec2:CreateSubnet",
+          "ec2:DeleteSubnet",
+          "ec2:DescribeSubnets",
+          "ec2:ModifySubnetAttribute",
+          "ec2:CreateRouteTable",
+          "ec2:DeleteRouteTable",
+          "ec2:DescribeRouteTables",
+          "ec2:CreateRoute",
+          "ec2:DeleteRoute",
+          "ec2:CreateInternetGateway",
+          "ec2:DeleteInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:DetachInternetGateway",
+          "ec2:DescribeInternetGateways"
         ]
         Resource = "*"
       }
