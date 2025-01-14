@@ -14,6 +14,7 @@ resource "aws_db_instance" "postgres" {
   publicly_accessible    = true
   skip_final_snapshot   = true
   vpc_security_group_ids = [aws_security_group.postgres.id] // this is causing a warning, wrong format
+  db_subnet_group_name = aws_db_subnet_group.postgres.name
 
   apply_immediately = false
   delete_automated_backups = true
@@ -23,10 +24,20 @@ resource "aws_db_instance" "postgres" {
   performance_insights_enabled = false
 }
 
+resource "aws_db_subnet_group" "postgres" {
+  name       = "infinite-cookbook-postgres"
+  subnet_ids = aws_subnet.public[*].id
+
+  tags = {
+    Name = "infinite-cookbook-postgres"
+  }
+}
+
 # Security group for RDS
 resource "aws_security_group" "postgres" {
   name        = "infinite-cookbook-postgres"
   description = "Security group for RDS instance"
+  vpc_id      = aws_vpc.main.id
   revoke_rules_on_delete = false
 
   ingress {
