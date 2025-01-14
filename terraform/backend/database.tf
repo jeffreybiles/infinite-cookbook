@@ -2,7 +2,7 @@
 resource "aws_db_instance" "postgres" {
   identifier        = "infinite-cookbook"
   engine            = "postgres"
-  engine_version    = "15.5"
+  engine_version    = "15.10"
   instance_class    = "db.t3.micro"
   allocated_storage = 20
 
