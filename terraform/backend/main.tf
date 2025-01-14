@@ -1,4 +1,13 @@
 terraform {
+  backend "s3" {
+    bucket         = "infinite-cookbook-terraform-state"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+
+    # dynamodb_table = "infinite-cookbook-terraform-state-lock"
+    # encrypt        = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
