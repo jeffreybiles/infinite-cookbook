@@ -41,15 +41,27 @@ jobs:
             -backend-config="region=us-east-1"
             # -backend-config="dynamodb_table=infinite-cookbook-terraform-state-lock"
 
-      - name: Debug Terraform State
+      - name: Import CloudWatch Log Group
         working-directory: ./terraform/backend
         run: |
-          echo "Listing S3 bucket contents:"
-          aws s3 ls s3://infinite-cookbook-terraform-state/
-          echo "Current Terraform state:"
-          terraform show
-          echo "terraform vpc id:"
-          terraform state show aws_vpc.main
+          terraform import \
+            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+            -var="github_repo=${{ github.repository }}" \
+            -var="db_password=${{ env.DB_PASSWORD }}" \
+            -var="groq_api_key=${{ env.GROQ_API_KEY }}" \
+            -var="exa_api_key=${{ env.EXA_API_KEY }}" \
+            aws_cloudwatch_log_group.lambda "/aws/lambda/infinite-cookbook-api" || true
+
+
+      # - name: Debug Terraform State
+      #   working-directory: ./terraform/backend
+      #   run: |
+      #     echo "Listing S3 bucket contents:"
+      #     aws s3 ls s3://infinite-cookbook-terraform-state/
+      #     echo "Current Terraform state:"
+      #     terraform show
+      #     echo "terraform vpc id:"
+      #     terraform state show aws_vpc.main
 
       - name: Login to Amazon ECR
         id: login-ecr
