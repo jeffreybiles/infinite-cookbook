@@ -35,36 +35,36 @@ jobs:
         working-directory: ./terraform/backend
         run: terraform init
 
-      - name: Import existing Lambda IAM role if needed
-        working-directory: ./terraform/backend
-        continue-on-error: true
-        run: |
-          terraform import \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}" \
-            -var="github_repo=${{ github.repository }}" \
-            aws_iam_role.lambda_exec infinite-cookbook-lambda
+      # - name: Import existing Lambda IAM role if needed
+      #   working-directory: ./terraform/backend
+      #   continue-on-error: true
+      #   run: |
+      #     terraform import \
+      #       -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+      #       -var="db_password=${{ env.DB_PASSWORD }}" \
+      #       -var="github_repo=${{ github.repository }}" \
+      #       aws_iam_role.lambda_exec infinite-cookbook-lambda
 
-      - name: Import existing GitHub Actions IAM role if needed
-        working-directory: ./terraform/backend
-        continue-on-error: true
-        run: |
-          terraform import \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}" \
-            -var="github_repo=${{ github.repository }}" \
-            aws_iam_role.github_actions github-actions
+      # - name: Import existing GitHub Actions IAM role if needed
+      #   working-directory: ./terraform/backend
+      #   continue-on-error: true
+      #   run: |
+      #     terraform import \
+      #       -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+      #       -var="db_password=${{ env.DB_PASSWORD }}" \
+      #       -var="github_repo=${{ github.repository }}" \
+      #       aws_iam_role.github_actions github-actions
 
 
-      - name: Import existing ECR repository if needed
-        working-directory: ./terraform/backend
-        continue-on-error: true
-        run: |
-          terraform import \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
-            -var="github_repo=${{ github.repository }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}" \
-            aws_ecr_repository.app infinite-cookbook-api
+      # - name: Import existing ECR repository if needed
+      #   working-directory: ./terraform/backend
+      #   continue-on-error: true
+      #   run: |
+      #     terraform import \
+      #       -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+      #       -var="github_repo=${{ github.repository }}" \
+      #       -var="db_password=${{ env.DB_PASSWORD }}" \
+      #       aws_ecr_repository.app infinite-cookbook-api
 
       - name: Terraform Apply
         working-directory: ./terraform/backend
