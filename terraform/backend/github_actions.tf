@@ -112,3 +112,28 @@ resource "aws_iam_role_policy" "github_actions_vpc_explicit" {
     ]
   })
 }
+
+# Add S3 permissions for Terraform state management
+resource "aws_iam_role_policy" "github_actions_s3" {
+  name = "terraform-state-management"
+  role = aws_iam_role.github_actions.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::infinite-cookbook-terraform-state",
+          "arn:aws:s3:::infinite-cookbook-terraform-state/*"
+        ]
+      }
+    ]
+  })
+}
