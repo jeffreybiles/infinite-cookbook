@@ -67,7 +67,7 @@ app.include_router(recipes.router)
 app.include_router(suggestions.router)
 
 
-handler = Mangum(app)
+handler = Mangum(app, api_gateway_base_path="/prod")
 
 @app.get("/")
 async def root():
