@@ -43,7 +43,9 @@ resource "aws_lambda_function" "api" {
   skip_destroy  = false
   reserved_concurrent_executions = -1
   publish = false
-  ephemeral_storage {}
+  ephemeral_storage {
+    size = 1024
+  }
 
   environment {
     variables = {
