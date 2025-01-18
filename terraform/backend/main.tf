@@ -54,6 +54,8 @@ resource "aws_lambda_function" "api" {
       EXA_API_KEY = var.exa_api_key
       PYTHONUNBUFFERED = "1"
       LOG_LEVEL = "INFO"
+      AWS_LAMBDA_LOG_LEVEL = "INFO"
+      PYTHONIOENCODING = "UTF-8"
     }
   }
   depends_on = [aws_db_instance.postgres]

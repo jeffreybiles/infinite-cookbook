@@ -6,10 +6,13 @@ import os
 logging.basicConfig(
     level=os.getenv('LOG_LEVEL', 'INFO'),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    force=True
 )
+
+# Explicitly configure the root logger to use sys.stdout
+root_logger = logging.getLogger()
+if not root_logger.handlers:
+    root_logger.addHandler(logging.StreamHandler(sys.stdout))
 
 # Create logger for this file
 logger = logging.getLogger(__name__)
@@ -72,7 +75,8 @@ async def root():
 
 @app.get("/test")
 async def test():
-    logger.info("Test endpoint called")
+    print("Test endpoint called -- print")
+    logger.info("Test endpoint called -- logger")
     return {"status": "ok"}
 
 if __name__ == "__main__":
