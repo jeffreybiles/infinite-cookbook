@@ -12,3 +12,9 @@ variable "db_password" {
   description = "Database password"
   type        = string
 }
+
+variable "groq_api_key" {
+  description = "GROQ API Key"
+  type        = string
+  sensitive   = true
+}

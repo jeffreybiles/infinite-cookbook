@@ -14,6 +14,7 @@ env:
   ECR_REPOSITORY: infinite-cookbook-api
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
 jobs:
   deploy:
@@ -74,4 +75,5 @@ jobs:
           terraform apply -auto-approve \
             -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
             -var="github_repo=${{ github.repository }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}"
+            -var="db_password=${{ env.DB_PASSWORD }}" \
+            -var="groq_api_key=${{ env.GROQ_API_KEY }}"

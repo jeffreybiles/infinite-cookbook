@@ -50,6 +50,7 @@ resource "aws_lambda_function" "api" {
   environment {
     variables = {
       DATABASE_URL = "postgresql+asyncpg://${aws_db_instance.postgres.username}:${var.db_password}@${aws_db_instance.postgres.endpoint}/${aws_db_instance.postgres.db_name}"
+      GROQ_API_KEY = var.groq_api_key
     }
   }
   depends_on = [aws_db_instance.postgres]
