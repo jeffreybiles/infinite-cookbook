@@ -181,7 +181,7 @@ resource "aws_route_table_association" "public" {
 
 // First, ensure your Lambda has the basic execution role with CloudWatch logging
 resource "aws_iam_role_policy_attachment" "lambda_basic" {
-  role       = aws_iam_role.lambda.name
+  role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
