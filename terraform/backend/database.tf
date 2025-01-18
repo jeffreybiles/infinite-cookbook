@@ -32,6 +32,10 @@ resource "aws_db_subnet_group" "postgres" {
   tags = {
     Name = "infinite-cookbook-postgres"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Security group for RDS

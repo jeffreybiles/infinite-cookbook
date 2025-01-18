@@ -75,15 +75,12 @@ jobs:
       - name: Fix DB Subnet Group
         working-directory: ./terraform/backend
         run: |
-          # Remove the old DB subnet group from state
-          terraform state rm aws_db_subnet_group.postgres
-
-          # Import it again (if it exists) or let Terraform create a new one
-          terraform import \
+          terraform apply -auto-approve \
+            -replace=aws_db_subnet_group.postgres \
             -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
             -var="github_repo=${{ github.repository }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}" \
-            aws_db_subnet_group.postgres infinite-cookbook-postgres || true
+            -var="db_password=${{ env.DB_PASSWORD }}"
+
       - name: Debug Terraform State
         working-directory: ./terraform/backend
         run: |
