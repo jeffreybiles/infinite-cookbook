@@ -71,6 +71,16 @@ jobs:
             -var="db_password=${{ env.DB_PASSWORD }}" \
             aws_db_subnet_group.postgres infinite-cookbook-postgres
 
+      - name: Debug Terraform State
+        working-directory: ./terraform/backend
+        run: |
+          echo "Listing S3 bucket contents:"
+          aws s3 ls s3://infinite-cookbook-terraform-state/
+          echo "Current Terraform state:"
+          terraform show
+          echo "terraform vpc id:"
+          terraform state show aws_vpc.main
+
       - name: Terraform Apply
         working-directory: ./terraform/backend
         env:
