@@ -145,6 +145,17 @@ resource "aws_subnet" "public" {
   }
 }
 
+resource "aws_subnet" "private" {
+  count             = 2
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.${count.index + 10}.0/24"  # Using different CIDR range from public subnets
+  availability_zone = "us-east-1${count.index == 0 ? "a" : "b"}"
+
+  tags = {
+    Name = "infinite-cookbook-private-${count.index + 1}"
+  }
+}
+
 # Create route table for public subnets
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
