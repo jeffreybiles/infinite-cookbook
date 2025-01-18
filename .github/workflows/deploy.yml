@@ -71,22 +71,6 @@ jobs:
       #       -var="db_password=${{ env.DB_PASSWORD }}" \
       #       aws_db_subnet_group.postgres infinite-cookbook-postgres
 
-
-      - name: Fix DB Subnet Group
-        working-directory: ./terraform/backend
-        run: |
-          # First try to destroy just the subnet group
-          terraform destroy -auto-approve -target=aws_db_subnet_group.postgres \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
-            -var="github_repo=${{ github.repository }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}"
-
-          terraform apply -auto-approve \
-            -replace=aws_db_subnet_group.postgres \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
-            -var="github_repo=${{ github.repository }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}"
-
       - name: Debug Terraform State
         working-directory: ./terraform/backend
         run: |
