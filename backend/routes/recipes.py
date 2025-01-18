@@ -7,6 +7,9 @@ from exa_py import Exa
 import os
 from dotenv import load_dotenv
 from typing_extensions import List, Optional, TypedDict
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -83,8 +86,14 @@ async def generate_recipe(request: RecipeRequest):
 
 @router.get("/recipes")
 async def get_recipes():
-    recipes = await fetch_recipes()
-    return {"recipes": recipes}
+    logger.info("Fetching recipes")
+    try:
+        recipes = await fetch_recipes()
+        logger.info(f"Successfully fetched {len(recipes)} recipes")
+        return recipes
+    except Exception as e:
+        logger.error(f"Error fetching recipes: {str(e)}")
+        raise
 
 @router.post("/update")
 async def update_recipe(request: UpdateRequest):
