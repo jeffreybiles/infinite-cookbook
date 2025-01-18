@@ -18,3 +18,9 @@ variable "groq_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "exa_api_key" {
+  description = "EXA API Key"
+  type        = string
+  sensitive   = true
+}
