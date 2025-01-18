@@ -188,7 +188,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-// For API Gateway logging
+# For API Gateway logging
 resource "aws_iam_role" "cloudwatch" {
   name = "api-gateway-cloudwatch-role"
 
@@ -230,7 +230,7 @@ resource "aws_iam_role_policy" "cloudwatch" {
   })
 }
 
-// Make sure API Gateway account settings use the CloudWatch role
+# Make sure API Gateway account settings use the CloudWatch role
 resource "aws_api_gateway_account" "main" {
   cloudwatch_role_arn = aws_iam_role.cloudwatch.arn
 }
@@ -238,4 +238,24 @@ resource "aws_api_gateway_account" "main" {
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${aws_lambda_function.api.function_name}"
   retention_in_days = 14
+}
+
+resource "aws_iam_role_policy" "lambda_logging" {
+  name = "lambda_logging"
+  role = aws_iam_role.lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = ["${aws_cloudwatch_log_group.lambda.arn}:*"]
+      }
+    ]
+  })
 }
