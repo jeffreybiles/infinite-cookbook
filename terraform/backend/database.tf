@@ -26,7 +26,7 @@ resource "aws_db_instance" "postgres" {
 
 resource "aws_db_subnet_group" "postgres" {
   name       = "infinite-cookbook-postgres"
-  subnet_ids = aws_subnet.private[*].id
+  subnet_ids = aws_subnet.public[*].id
 
   tags = {
     Name = "infinite-cookbook-postgres"

@@ -40,16 +40,36 @@ jobs:
             -backend-config="region=us-east-1"
             # -backend-config="dynamodb_table=infinite-cookbook-terraform-state-lock"
 
-      - name: Import existing DB subnet group if needed
+      - name: Import existing resources if needed
         working-directory: ./terraform/backend
         continue-on-error: true
         run: |
+          # Import VPC
+          terraform import \
+            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+            -var="github_repo=${{ github.repository }}" \
+            -var="db_password=${{ env.DB_PASSWORD }}" \
+            aws_vpc.main vpc-04b67c968ba769f27
+
+          # Import public subnets
+          terraform import \
+            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+            -var="github_repo=${{ github.repository }}" \
+            -var="db_password=${{ env.DB_PASSWORD }}" \
+            "aws_subnet.public[0]" subnet-0a90e4d84c49c63a8
+
+          terraform import \
+            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
+            -var="github_repo=${{ github.repository }}" \
+            -var="db_password=${{ env.DB_PASSWORD }}" \
+            "aws_subnet.public[1]" subnet-0f8db79cb0d3745df
+
+          # Import DB subnet group
           terraform import \
             -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
             -var="github_repo=${{ github.repository }}" \
             -var="db_password=${{ env.DB_PASSWORD }}" \
             aws_db_subnet_group.postgres infinite-cookbook-postgres
-
 
       - name: Terraform Apply
         working-directory: ./terraform/backend
