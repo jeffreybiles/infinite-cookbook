@@ -52,6 +52,8 @@ resource "aws_lambda_function" "api" {
       DATABASE_URL = "postgresql+asyncpg://${aws_db_instance.postgres.username}:${var.db_password}@${aws_db_instance.postgres.endpoint}/${aws_db_instance.postgres.db_name}"
       GROQ_API_KEY = var.groq_api_key
       EXA_API_KEY = var.exa_api_key
+      PYTHONUNBUFFERED = "1"
+      LOG_LEVEL = "INFO"
     }
   }
   depends_on = [aws_db_instance.postgres]
@@ -231,4 +233,9 @@ resource "aws_iam_role_policy" "cloudwatch" {
 // Make sure API Gateway account settings use the CloudWatch role
 resource "aws_api_gateway_account" "main" {
   cloudwatch_role_arn = aws_iam_role.cloudwatch.arn
+}
+
+resource "aws_cloudwatch_log_group" "lambda" {
+  name              = "/aws/lambda/${aws_lambda_function.api.function_name}"
+  retention_in_days = 14
 }

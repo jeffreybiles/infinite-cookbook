@@ -1,3 +1,22 @@
+import logging
+import sys
+import os
+
+# Configure logging at the root level
+logging.basicConfig(
+    level=os.getenv('LOG_LEVEL', 'INFO'),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# Create logger for this file
+logger = logging.getLogger(__name__)
+
+# Test log at startup
+logger.info("FastAPI application starting up")
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,17 +24,6 @@ from mangum import Mangum
 from routes import recipes, suggestions
 import uvicorn
 from db.base import init_db
-import logging
-import sys
-
-# Set up logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,12 +42,13 @@ app = FastAPI(lifespan=lifespan)
 # Add error middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    logger.info(f"Received {request.method} request to {request.url.path}")
     try:
         response = await call_next(request)
-        logger.info(f"Path: {request.url.path} - Status: {response.status_code}")
+        logger.info(f"Completed {request.method} request to {request.url.path} with status {response.status_code}")
         return response
     except Exception as e:
-        logger.error(f"Request failed: {str(e)}")
+        logger.error(f"Error processing {request.method} request to {request.url.path}: {str(e)}")
         raise
 
 # Add CORS middleware
@@ -60,6 +69,11 @@ handler = Mangum(app)
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.get("/test")
+async def test():
+    logger.info("Test endpoint called")
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     print("Starting server")
