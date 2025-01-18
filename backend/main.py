@@ -39,19 +39,23 @@ async def lifespan(app: FastAPI):
         raise
     yield
 
-app = FastAPI(lifespan=lifespan)
-
+# Create the FastAPI app with the correct root_path
+app = FastAPI(
+    lifespan=lifespan,
+    root_path="/prod" # if this works, get it from the ENV, from the terraform config
+)
 
 # Add error middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    logger.info(f"Received {request.method} request to {request.url.path}")
+    # Add more detailed logging
+    logger.info(f"Request: {request.method} {request.url.path} (Full URL: {request.url})")
     try:
         response = await call_next(request)
-        logger.info(f"Completed {request.method} request to {request.url.path} with status {response.status_code}")
+        logger.info(f"Response: {request.method} {request.url.path} - Status: {response.status_code}")
         return response
     except Exception as e:
-        logger.error(f"Error processing {request.method} request to {request.url.path}: {str(e)}")
+        logger.error(f"Error: {request.method} {request.url.path} - {str(e)}")
         raise
 
 # Add CORS middleware
@@ -66,17 +70,17 @@ app.add_middleware(
 app.include_router(recipes.router)
 app.include_router(suggestions.router)
 
-
-handler = Mangum(app, api_gateway_base_path="/prod")
+# Create the handler without the base_path since we're using root_path
+handler = Mangum(app)
 
 @app.get("/")
 async def root():
+    logger.info("Root endpoint called")
     return {"message": "Hello World"}
 
 @app.get("/test")
 async def test():
-    print("Test endpoint called -- print")
-    logger.info("Test endpoint called -- logger")
+    logger.info("Test endpoint called")
     return {"status": "ok"}
 
 if __name__ == "__main__":
