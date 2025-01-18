@@ -35,16 +35,6 @@ jobs:
         working-directory: ./terraform/backend
         run: terraform init
 
-      - name: Import existing db subnet group if needed
-        working-directory: ./terraform/backend
-        continue-on-error: true
-        run: |
-          terraform import \
-            -var="aws_account_id=${{ env.AWS_ACCOUNT_ID }}" \
-            -var="github_repo=${{ github.repository }}" \
-            -var="db_password=${{ env.DB_PASSWORD }}" \
-            aws_db_subnet_group.postgres infinite-cookbook-postgres
-
       - name: Terraform Apply
         working-directory: ./terraform/backend
         env:
