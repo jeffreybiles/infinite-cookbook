@@ -49,7 +49,7 @@ resource "aws_lambda_function" "api" {
 
   environment {
     variables = {
-      DATABASE_URL = "postgresql://${aws_db_instance.postgres.username}:${var.db_password}@${aws_db_instance.postgres.endpoint}/${aws_db_instance.postgres.db_name}"
+      DATABASE_URL = "postgresql+asyncpg://${aws_db_instance.postgres.username}:${var.db_password}@${aws_db_instance.postgres.endpoint}/${aws_db_instance.postgres.db_name}"
     }
   }
   depends_on = [aws_db_instance.postgres]
@@ -179,7 +179,6 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-// First, ensure your Lambda has the basic execution role with CloudWatch logging
 resource "aws_iam_role_policy_attachment" "lambda_basic" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
