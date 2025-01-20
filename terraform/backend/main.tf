@@ -58,6 +58,10 @@ resource "aws_lambda_function" "api" {
       PYTHONIOENCODING = "UTF-8"
     }
   }
+  image_config {
+    command = ["main.handler"]
+  }
+  architectures   = ["x86_64"]
   depends_on = [aws_db_instance.postgres]
 }
 
