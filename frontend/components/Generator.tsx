@@ -6,7 +6,7 @@ import { postRequest } from "@/utils/post-request"
 import { getPreferences } from "@/utils/preferences"
 
 export default function Generator({ is_custom_input }: { is_custom_input: boolean }) {
-    const [chosenRecipeTypes, setChosenRecipeTypes] = useState<string[]>([]);
+    const [generatedIdeas, setGeneratedIdeas] = useState<string[]>([]);
     const [customDishDescription, setCustomDishDescription] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -42,9 +42,9 @@ export default function Generator({ is_custom_input }: { is_custom_input: boolea
     }
 
     const generateMoreIdeas = async () => {
-      const response = await fetch('http://localhost:8000/dish-ideas?current=' + chosenRecipeTypes.join(','));
+      const response = await fetch('http://localhost:8000/dish-ideas?current=' + generatedIdeas.join(','));
       const data = await response.json();
-      setChosenRecipeTypes([...chosenRecipeTypes, ...data.dish_ideas]);
+      setGeneratedIdeas([...generatedIdeas, ...data.dish_ideas]);
     }
 
     return (
@@ -54,14 +54,14 @@ export default function Generator({ is_custom_input }: { is_custom_input: boolea
           <button className="bg-blue-500 text-white p-2 rounded-md disabled:opacity-50" onClick={() => generateRecipe(customDishDescription)} disabled={customDishDescription === ''}>Generate</button>
         </div> : <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-2">
-            {chosenRecipeTypes.map((recipeType) => (
-              <div className="col-span-1" key={recipeType}>
+            {generatedIdeas.map((idea) => (
+              <div className="col-span-1" key={idea}>
               <button
                 className="flex items-center justify-center border border-gray-300 p-2 rounded-md w-full h-full hover:bg-gray-100 transition-colors duration-300 disabled:opacity-50 dark:hover:bg-gray-700"
-                onClick={() => generateRecipe(recipeType)}
+                onClick={() => generateRecipe(idea)}
                 disabled={loadingMessage !== ''}
               >
-                {recipeType}
+                {idea}
               </button>
               </div>
             ))}
