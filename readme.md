@@ -11,6 +11,8 @@ This contains two parts:
 
 NextJS was chosen because it was familiar and I do not want to learn anything new on the frontend for this project.  If deploying to AWS is too much of a pain, I may switch to Remix or plain React.  I could have also done the LLM API calls in NextJS backend endpoints, but I want to familiarize myself with the Python ecosystem, since most ML and AI is done there.
 
+**At the current stage, this app does not follow best software-engineering practices!**
+
 ---
 
 We will use LLM generation for the following:
