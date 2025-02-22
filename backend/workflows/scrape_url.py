@@ -1,6 +1,6 @@
 from prompts import preferences_prompt
 from my_types import Preferences
-from ai_helpers import completion, json_completion
+from ai_helpers import completion, json_completion, check_validity
 from fastapi import HTTPException
 from exa_py import Exa
 import os
@@ -12,6 +12,12 @@ exa = Exa(os.getenv("EXA_API_KEY"))
 
 async def scrape_url_and_save(url: str, preferences: Preferences, prompt: str):
   recipe_completion = scrape_and_extract(url)
+
+  if not recipe_completion:
+      raise HTTPException(status_code=400, detail="Failed to generate recipe")
+  if not check_validity(recipe_completion):
+      raise HTTPException(status_code=400, detail="Could not find recipe at that URL.  Try a different link.")
+
   recipe_with_preferences = update_with_preferences(url, preferences, recipe_completion)
   if has_further_instructions(prompt):
     recipe_with_further_instructions = completion(f"""
