@@ -15,7 +15,3 @@ class UpdateRequest(BaseModel):
     recipe_id: int
     modifications: str
     preferences: Preferences
-
-class ScrapeRequest(BaseModel):
-    url: str
-    preferences: Preferences

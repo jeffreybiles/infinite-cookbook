@@ -7,7 +7,8 @@ from fastapi import APIRouter
 from exa_py import Exa
 import os
 from dotenv import load_dotenv
-from my_types import RecipeRequest, UpdateRequest, ScrapeRequest
+from my_types import RecipeRequest, UpdateRequest
+import re
 
 router = APIRouter()
 
@@ -44,8 +45,13 @@ exa = Exa(os.getenv("EXA_API_KEY"))
 @router.post("/generate")
 async def generate_recipe(request: RecipeRequest):
     try:
-        db_recipe = await generate_and_save_recipe(request)
-        return {"recipe": db_recipe}
+      url = get_url_via_regex(request.recipeRequest)
+      if url:
+          db_recipe = await scrape_url_and_save(url=url, preferences=request.preferences)
+          return {"recipe": db_recipe}
+      else:
+          db_recipe = await generate_and_save_recipe(request)
+          return {"recipe": db_recipe}
 
     except HTTPException:
         raise
@@ -80,12 +86,12 @@ async def get_recipe(recipe_id: str):
     related = await fetch_related(recipe)
     return {"recipe": recipe, "related": related}
 
-@router.post("/scrape")
-async def scrape_from_url(request: ScrapeRequest):
-    try:
-        db_recipe = await scrape_url_and_save(url=request.url, preferences=request.preferences)
-        return {"recipe": db_recipe}
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error: {str(e)}")
+def get_url_via_regex(string: str):
+    url_pattern = re.compile(
+        r'(?:https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+    )
+    results = url_pattern.findall(string)
+    if results:
+        return results[0]
+    else:
+        return None
