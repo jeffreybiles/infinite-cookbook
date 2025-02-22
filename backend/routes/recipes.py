@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from db.recipe import fetch_recipe, fetch_related, fetch_recipes
+from ai_helpers import json_completion
 from workflows.generate_recipe import generate_and_save_recipe
 from workflows.update_recipe import update_recipe_and_save
 from workflows.scrape_url import scrape_url_and_save
@@ -21,18 +22,9 @@ exa = Exa(os.getenv("EXA_API_KEY"))
     # Especially since we test for http/https, which will be in all copy/paste cases, but not any context people will type out by hand
     # For example, "I want to make a cake for my friend who works at expedia.com"
     # For the prompt, we can just add the recipe to it.  "The recipe referenced in the URL is: #{recipe_contents}"
+    # Make sure to update the workflow to share steps + block URLs that aren't recipes
 # Step 3: We do it based on LLM categorization.  Ask it to categorize the recipe.
     # For this use case, we don't actually need to do the LLM categorization, the regex works fine... but not everything is as easy to determine with regex as a URL.
-# Step 4: Updating preferences.  If the user types in anything like "I am gluten free" or "make it dairy free", then the LLM will send back a response of `{preferences: {gluten_free: true, dairy_free: true}}`
-    # Then on the frontend, we can use that to update the preferences
-    # note: we'd usually do that on the backend, but this app has the worst patterns for this and no user table lol
-    # Also important to note: this isn't actually a separate workflow, this is just a different option in the other two workflows
-    # So not really a great example of a router, omg I have the worst app for this
-    # Also very important to note: someone might want to only have their preferences for one recipe, but not for others
-    # So maybe in the response we pop up a little options box that says "Do you want to update your preferences?" (assuming they're different than what we already have)
-# Another thing to note: affordances are important.  You might not always want a generic text input
-# If you have checkboxes, people can see that "oh, I can do that", instead of guessing
-# Especially important if your app is not fully general-purpose.  You want to let people know what it can do!
 
 # Now that we have the LLM doing categorization, we could do things like "I want the cake I had last week, but make it with apples instead of bananas".
 # Then that goes to a third workflow that finds the recipe in our database, and then creates an updated version.
@@ -41,6 +33,22 @@ exa = Exa(os.getenv("EXA_API_KEY"))
     # We'd also want to implement some further UI patterns, such as responding with a list of top recipe matches that it found, and asking the user to pick one before updating it
     # So maybe we'll do a video on that later.
 
+# Something else we can do: updating preferences.  If the user types in anything like "I am gluten free" or "I am following a low-fat diet", then the LLM will send back a response of `{preferences: {gluten_free: true, dairy_free: true}}`
+    # Then we'd update the preferences
+    # note: we'd usually do that on the backend, but this app has the worst patterns for this and no user table lol, so we'd do it on the frontend)
+# Another thing to note: affordances are important.  You might not always want a generic text input
+# If you have dedicated UI elements, people can see that "oh, I can do that", instead of guessing
+# Especially important if your app is not fully general-purpose.  You want to let people know what it can do!
+# It could also be part of another workflow, generating the recipe and then updating preferences based on the recipe
+# But in this case, you don't want the app changing things without the user being aware
+# So, for example, if they're baking a cake for their gluten-free friend, you don't want to change their preferences to gluten-free permanently
+# So if we actually implement this, then after the response we'd pop up a little options box that says "Do you want to update your preferences?" (assuming they're different than what we already have)
+# But in the original case, where they user just types in "I am gluten free", the intent is clear and we can update our memory accordingly - although it's not clear how they would know that this prompt would do anything
+# This UI pattern is called human-in-the-loop, by the way
+
+# So we've generated ideas for two new videos:
+# * Updating preferences with human-in-the-loop
+# * Finding previous recipes with vector search and date queries
 
 @router.post("/generate")
 async def generate_recipe(request: RecipeRequest):
@@ -48,10 +56,12 @@ async def generate_recipe(request: RecipeRequest):
       url = get_url_via_regex(request.recipeRequest)
       if url:
           db_recipe = await scrape_url_and_save(url=url, preferences=request.preferences, prompt=request.recipeRequest)
-          return {"recipe": db_recipe}
       else:
           db_recipe = await generate_and_save_recipe(request)
-          return {"recipe": db_recipe}
+      # it would be better if this were run before using the preferences, so that we don't apply them unnecessarily (for example, saying gluten is okay)
+      changes = preference_changes(request.recipeRequest)
+      print("changes", changes)
+      return {"recipe": db_recipe, "changes": changes}
 
     except HTTPException:
         raise
@@ -85,6 +95,22 @@ async def get_recipe(recipe_id: str):
         raise HTTPException(status_code=404, detail="Recipe not found")
     related = await fetch_related(recipe)
     return {"recipe": recipe, "related": related}
+
+def preference_changes(string: str):
+    return json_completion(f"""
+      Return a json with the following key:
+      - changes: [{{change_category: 'avoidOptions' | 'spiceLevels' | 'lifestyleOptions', change_key: string, value: boolean}}]
+
+      The preferences that can be changed are:
+
+      - avoidOptions: ["peanuts", "gluten", "dairy", "eggs", "fish", "shellfish", "seed oils","soy", "tree nuts", "alcohol", "caffeine", "sugar", "salt", "artificial sweeteners"]
+      - spiceLevels: ["mild", "medium", "hot", "very hot"]
+      - lifestyleOptions: ["vegan", "vegetarian", "halal", "kosher", "paleo", "keto", "low-carb", "low-fat"]
+
+      Only mark it as changed if they specify a change to any of these categories.  It can be changing it to false, or changing it to true.
+
+      The prompt is: {string}
+    """)
 
 def get_url_via_regex(string: str):
     url_pattern = re.compile(
