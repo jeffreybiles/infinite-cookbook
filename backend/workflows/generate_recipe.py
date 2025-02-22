@@ -14,11 +14,16 @@ async def generate_and_save_recipe(request: RecipeRequest):
   if not check_validity(recipe_completion):
       raise HTTPException(status_code=400, detail="The response was not a recipe.  Try a different prompt.")
 
+  db_recipe = await save_to_db(recipe_completion, request.recipeRequest)
+
+  return db_recipe
+
+async def save_to_db(recipe_completion: str, prompt: str):
   recipe_name = generate_name(recipe_completion)
 
   # Save to database
   db_recipe = Recipe(
-      prompt=request.recipeRequest,
+      prompt=prompt,
       content=recipe_completion,
       name=recipe_name,
   )

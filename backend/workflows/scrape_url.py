@@ -6,11 +6,31 @@ from fastapi import HTTPException
 from exa_py import Exa
 import os
 from dotenv import load_dotenv
+from workflows.generate_recipe import save_to_db
 
 load_dotenv()
 exa = Exa(os.getenv("EXA_API_KEY"))
 
-async def scrape_url_and_save(url: str, preferences: Preferences):
+async def scrape_url_and_save(url: str, preferences: Preferences, prompt: str):
+  recipe_completion = scrape_and_extract(url)
+  recipe_with_preferences = update_with_preferences(url, preferences, recipe_completion)
+  db_recipe = await save_to_db(recipe_with_preferences, prompt)
+  return db_recipe
+
+def update_with_preferences(url: str, preferences: Preferences, recipe_completion: str):
+  return completion(f"""
+    I have the following preferences:
+
+    {preferences_prompt(preferences)}
+
+    Please update the following recipe:
+    {recipe_completion}
+
+    Remember to include the url as the source: {url}, but say that you modified it to fit my preferences.
+    """)
+
+
+def scrape_and_extract(url: str):
   results = exa.get_contents(
       [url],
       text=True
@@ -25,27 +45,4 @@ async def scrape_url_and_save(url: str, preferences: Preferences):
 
       {result}
   """)
-
-  recipe_with_preferences = completion(f"""
-  I have the following preferences:
-
-  {preferences_prompt(preferences)}
-
-  Please update the following recipe:
-  {recipe_completion}
-
-  Remember to include the url as the source: {url}, but say that you modified it to fit my preferences.
-  """)
-
-  recipe_name = generate_name(recipe_with_preferences)
-
-  db_recipe = Recipe(
-      content=recipe_with_preferences,
-      prompt=f"Scraped from {url}",
-      name=recipe_name
-  )
-  await add_to_db(db_recipe)
-  db_recipe.original_id = db_recipe.id
-  await update_recipe_in_db(db_recipe)
-
-  return db_recipe
+  return recipe_completion

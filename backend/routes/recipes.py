@@ -47,7 +47,7 @@ async def generate_recipe(request: RecipeRequest):
     try:
       url = get_url_via_regex(request.recipeRequest)
       if url:
-          db_recipe = await scrape_url_and_save(url=url, preferences=request.preferences)
+          db_recipe = await scrape_url_and_save(url=url, preferences=request.preferences, prompt=request.recipeRequest)
           return {"recipe": db_recipe}
       else:
           db_recipe = await generate_and_save_recipe(request)
