@@ -25,6 +25,11 @@ exa = Exa(os.getenv("EXA_API_KEY"))
     # Make sure to update the workflow to share steps + block URLs that aren't recipes
 # Step 3: We do it based on LLM categorization.  Ask it to categorize the recipe.
     # For this use case, we don't actually need to do the LLM categorization, the regex works fine... but not everything is as easy to determine with regex as a URL.
+    # So do the prompt in the Groq playground, and have it detect the 3rd and 4th categories (update_previous and update_preferences, explained below)
+# Talk about how in production, you'd want to go through the edge cases and make sure it's still going to the correct workflow.  If it goes to the wrong place, the entire process will have incorrect outputs!
+# So, for example, if the user types in "I want to make a cake for my friend who works at expedia.com" - it should go to the generate workflow, not the update workflow, not the scrape workflow
+# And if they say "gluten-free cake", it should go to the generate workflow, not the update_preferences workflow
+# This is where evals and prompt engineering are important.
 
 # Now that we have the LLM doing categorization, we could do things like "I want the cake I had last week, but make it with apples instead of bananas".
 # Then that goes to a third workflow that finds the recipe in our database, and then creates an updated version.
