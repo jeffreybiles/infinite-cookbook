@@ -1,77 +1,50 @@
 from fastapi import HTTPException
-from db.recipe import Recipe, add_to_db, fetch_recipe, fetch_related, fetch_recipes, update_recipe as update_recipe_in_db
-from ai_helpers import completion, check_validity, generate_name
-from pydantic import BaseModel
+from db.recipe import fetch_recipe, fetch_related, fetch_recipes
+from workflows.generate_recipe import generate_and_save_recipe
+from workflows.update_recipe import update_recipe_and_save
+from workflows.scrape_url import scrape_url_and_save
 from fastapi import APIRouter
 from exa_py import Exa
 import os
 from dotenv import load_dotenv
-from typing_extensions import List, Optional, TypedDict
+from my_types import RecipeRequest, UpdateRequest, ScrapeRequest
 
 router = APIRouter()
 
 load_dotenv()
 exa = Exa(os.getenv("EXA_API_KEY"))
 
-class Preferences(TypedDict):
-    avoid: List[str]
-    lifestyle: List[str]
-    spiceLevel: Optional[str]
-    custom: str
+# Step 1: Scrape URL if it exists.  Can use regex.
+# Step 2: Take the rest of the request into context - scrape, and then generate based on the rest of the prompt.
+    # Surprisingly, we can still use regex for the first part of this!
+    # Especially since we test for http/https, which will be in all copy/paste cases, but not any context people will type out by hand
+    # For example, "I want to make a cake for my friend who works at expedia.com"
+    # For the prompt, we can just add the recipe to it.  "The recipe referenced in the URL is: #{recipe_contents}"
+# Step 3: We do it based on LLM categorization.  Ask it to categorize the recipe.
+    # For this use case, we don't actually need to do the LLM categorization, the regex works fine... but not everything is as easy to determine with regex as a URL.
+# Step 4: Updating preferences.  If the user types in anything like "I am gluten free" or "make it dairy free", then the LLM will send back a response of `{preferences: {gluten_free: true, dairy_free: true}}`
+    # Then on the frontend, we can use that to update the preferences
+    # note: we'd usually do that on the backend, but this app has the worst patterns for this and no user table lol
+    # Also important to note: this isn't actually a separate workflow, this is just a different option in the other two workflows
+    # So not really a great example of a router, omg I have the worst app for this
+    # Also very important to note: someone might want to only have their preferences for one recipe, but not for others
+    # So maybe in the response we pop up a little options box that says "Do you want to update your preferences?" (assuming they're different than what we already have)
+# Another thing to note: affordances are important.  You might not always want a generic text input
+# If you have checkboxes, people can see that "oh, I can do that", instead of guessing
+# Especially important if your app is not fully general-purpose.  You want to let people know what it can do!
 
-class RecipeRequest(BaseModel):
-    recipeRequest: str
-    preferences: Preferences
+# Now that we have the LLM doing categorization, we could do things like "I want the cake I had last week, but make it with apples instead of bananas".
+# Then that goes to a third workflow that finds the recipe in our database, and then creates an updated version.
+    # Of course, actually finding the right recipe and implementing that workflow is beyond the scope of this video
+    # It's actually an interesting problem.  For the date range we'd likely want to generate some SQL.  For the rest we could do vector search with the contents of the recipe.
+    # We'd also want to implement some further UI patterns, such as responding with a list of top recipe matches that it found, and asking the user to pick one before updating it
+    # So maybe we'll do a video on that later.
 
-class UpdateRequest(BaseModel):
-    recipe_id: int
-    modifications: str
-    preferences: Preferences
-
-class ScrapeRequest(BaseModel):
-    url: str
-    preferences: Preferences
-
-from typing import List, Optional, TypedDict
-
-
-
-def preferences_prompt(preferences: Preferences):
-    string = ""
-    if preferences["avoid"]:
-        string += f"Avoid the following ingredients: {', '.join(preferences['avoid'])}\n"
-    if preferences["lifestyle"]:
-        string += f"Follow the following lifestyle: {', '.join(preferences['lifestyle'])}\n"
-    if preferences["spiceLevel"]:
-        string += f"Have the following spice level, if applicable, to this recipe (ignore if dish does not require spice): {preferences['spiceLevel']}\n"
-    if preferences["custom"]:
-        string += f"Also keep the following in mind, if applicable: {preferences['custom']}\n"
-    return string
 
 @router.post("/generate")
 async def generate_recipe(request: RecipeRequest):
     try:
-        recipe_completion = completion(f"""Generate a recipe for {request.recipeRequest}. Include ingredients and steps.
-
-        {preferences_prompt(request.preferences)}
-        """)
-        if not recipe_completion:
-            raise HTTPException(status_code=400, detail="Failed to generate recipe")
-        if not check_validity(recipe_completion):
-            raise HTTPException(status_code=400, detail="The response was not a recipe.  Try a different prompt.")
-
-        recipe_name = generate_name(recipe_completion)
-
-        # Save to database
-        db_recipe = Recipe(
-            prompt=request.recipeRequest,
-            content=recipe_completion,
-            name=recipe_name,
-        )
-        await add_to_db(db_recipe)
-        db_recipe.original_id = db_recipe.id
-        await update_recipe_in_db(db_recipe)
-
+        db_recipe = await generate_and_save_recipe(request)
         return {"recipe": db_recipe}
 
     except HTTPException:
@@ -89,36 +62,7 @@ async def get_recipes():
 @router.post("/update")
 async def update_recipe(request: UpdateRequest):
     try:
-        old_recipe = await fetch_recipe(request.recipe_id)
-        if not old_recipe:
-            raise HTTPException(status_code=404, detail="Recipe not found")
-
-        updated_recipe_completion = completion(f"""Update the recipe for {old_recipe.content} to include the following modifications:
-
-        {request.modifications}
-
-        Remember my other preferences:{preferences_prompt(request.preferences)}
-        """)
-
-        if not updated_recipe_completion:
-            raise HTTPException(status_code=400, detail="Failed to update recipe")
-
-        if not check_validity(updated_recipe_completion):
-            raise HTTPException(status_code=400, detail="The response was not a recipe.  Try a different prompt.")
-
-        recipe_name = generate_name(updated_recipe_completion)
-
-        db_recipe = Recipe(
-            parent_id=request.recipe_id,
-            content=updated_recipe_completion,
-            prompt=request.modifications,
-            name=recipe_name,
-            original_id=old_recipe.original_id,
-        )
-        await add_to_db(db_recipe)
-        old_recipe.is_latest = False # type: ignore
-        await update_recipe_in_db(old_recipe)
-
+        db_recipe = await update_recipe_and_save(request)
         return {"recipe": db_recipe}
 
     except HTTPException:
@@ -139,47 +83,9 @@ async def get_recipe(recipe_id: str):
 @router.post("/scrape")
 async def scrape_from_url(request: ScrapeRequest):
     try:
-        results = exa.get_contents(
-            [request.url],
-            text=True
-        )
-        result = results.results[0].text
-        if not result:
-            raise HTTPException(status_code=400, detail="Failed to fetch URL")
-
-        recipe_completion = completion(f"""
-            Extract the recipe from this HTML content and format it nicely with ingredients and instructions.
-            Return just the formatted recipe text, without any stories or filler.  Do not say that it is reformatted.
-
-            {result}
-        """)
-
-        recipe_with_preferences = completion(f"""
-        I have the following preferences:
-
-        {preferences_prompt(request.preferences)}
-
-        Please update the following recipe:
-        {recipe_completion}
-
-        Remember to include the url as the source: {request.url}, but say that you modified it to fit my preferences.
-        """)
-
-        recipe_name = generate_name(recipe_with_preferences)
-
-        db_recipe = Recipe(
-            content=recipe_with_preferences,
-            prompt=f"Scraped from {request.url}",
-            name=recipe_name
-        )
-        await add_to_db(db_recipe)
-        db_recipe.original_id = db_recipe.id
-        await update_recipe_in_db(db_recipe)
-
+        db_recipe = await scrape_url_and_save(url=request.url, preferences=request.preferences)
         return {"recipe": db_recipe}
-
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error scraping URL: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to scrape recipe from URL.  Please ensure the URL is valid and try again.")
+        print(f"Error: {str(e)}")
