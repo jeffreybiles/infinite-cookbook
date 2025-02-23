@@ -50,7 +50,12 @@ export default function Generator({ is_custom_input }: { is_custom_input: boolea
     return (
       <div className="flex flex-col gap-2 w-full">
         {is_custom_input ? <div className="flex flex-col gap-2 w-full">
-          <textarea className="border border-gray-300 p-2 rounded-md w-full" placeholder="Describe what you want to eat.  Feel free to go into detail or leave it vague." value={customDishDescription} onChange={(e) => setCustomDishDescription(e.target.value)} />
+          <textarea
+            className="border border-gray-300 p-2 rounded-md w-full h-24"
+            placeholder="Describe what you want to eat, or link to a recipe you want to modify.  You can also specify your dietary preferences."
+            value={customDishDescription}
+            onChange={(e) => setCustomDishDescription(e.target.value)}
+          />
           <button className="bg-blue-500 text-white p-2 rounded-md disabled:opacity-50" onClick={() => generateRecipe(customDishDescription)} disabled={customDishDescription === ''}>Generate</button>
         </div> : <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-2">

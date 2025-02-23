@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="items-center justify-items-center p-8 pb-20 gap-16 font-[family-name:var(--font-geist-sans)]">
       <h1 className="text-4xl font-bold mb-0 pb-0">Infinite Cookbook</h1>
-      <p className="text-lg m-0 p-0">As many recipes as you want, completely customizable (<Link href="/preferences" className="text-lg mt-0 pt-0 text-blue-500">update preferences now</Link>)</p>
+      <p className="text-lg m-0 p-0">As many recipes as you want, completely customizable</p>
 
       <div className="justify-center gap-4 max-w-4xl">
         <div>
