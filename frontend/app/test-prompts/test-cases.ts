@@ -6,6 +6,26 @@ export type TestCase = {
 
 export const testCases: TestCase[] = [
   {
+    text: "It's locked me out",
+    expectedCategory: "Report an Issue",
+    result: null
+  },
+  {
+    text: "I thought I pad last month",
+    expectedCategory: "Billing",
+    result: null
+  },
+  {
+    text: "How much do I owe?",
+    expectedCategory: "Billing",
+    result: null
+  },
+  {
+    text: "Can you categorize tacos?",
+    expectedCategory: "New Customer",
+    result: null
+  },
+  {
     text: "I need to update my credit card information",
     expectedCategory: "Billing",
     result: null

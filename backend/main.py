@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import recipes, suggestions
+from routes import recipes, suggestions, customer_chat
 import uvicorn
 from db.base import init_db
 
@@ -18,7 +18,7 @@ app.add_middleware(
 
 app.include_router(recipes.router)
 app.include_router(suggestions.router)
-
+app.include_router(customer_chat.router)
 
 @app.on_event("startup")
 async def startup():

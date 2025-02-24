@@ -17,13 +17,17 @@ const ErrorFallback = ({ error }: { error: Error }) => {
 
 const PromptTesterContent = () => {
   const [testCases, setTestCases] = useState<TestCase[]>(importedTestCases);
+  const [isRunning, setIsRunning] = useState(false);
 
-  const runTests = () => {
-    const newTestCases = testCases.map(testCase => ({
+  const runTests = async () => {
+    setIsRunning(true);
+    // TODO: set test cases as they arrive, and mark their loading state individually
+    const newTestCases = await Promise.all(testCases.map(async (testCase) => ({
       ...testCase,
-      result: classifyPrompt(testCase.text)
-    }));
+      result: await classifyPrompt(testCase.text)
+    })));
     setTestCases(newTestCases);
+    setIsRunning(false);
   };
 
   const getAccuracy = () => {
@@ -40,8 +44,9 @@ const PromptTesterContent = () => {
         <button
           onClick={runTests}
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          disabled={isRunning}
         >
-          Run Tests
+          {isRunning ? 'Running...' : 'Run Tests'}
         </button>
         <div className="text-lg">
           Accuracy: {getAccuracy()}%
